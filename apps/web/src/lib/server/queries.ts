@@ -4,8 +4,17 @@ const PROJECT_ID = '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
 
 export async function getProject() {
   if (!sql) return null;
-  const [project] = await sql`SELECT * FROM projects WHERE id = ${PROJECT_ID}`;
-  return project || null;
+  const [p] = await sql`SELECT * FROM projects WHERE id = ${PROJECT_ID}`;
+  if (!p) return null;
+  return {
+    ...p,
+    localAuthority: p.local_authority,
+    totalBudget: p.total_budget,
+    contingencyPct: p.contingency_pct,
+    startDate: p.start_date,
+    targetCompletion: p.target_completion,
+    createdAt: p.created_at,
+  };
 }
 
 export async function getPhases() {
