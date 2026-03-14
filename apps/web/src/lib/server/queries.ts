@@ -1,94 +1,245 @@
-import { db } from './db';
-import { eq, and, desc, asc, sql } from 'drizzle-orm';
-import { projects, phases, tasks, budgetCategories, budgetEntries, contacts, decisions, decisionOptions, planningConditions, cilSteps, inspections, vatEntries, diaryEntries, photos, snags, documents, activityLog } from '@buildtracker/db';
+import { sql } from './db';
 
 const PROJECT_ID = '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
 
 export async function getProject() {
-  if (!db) return null;
-  const [project] = await db.select().from(projects).where(eq(projects.id, PROJECT_ID));
+  if (!sql) return null;
+  const [project] = await sql`SELECT * FROM projects WHERE id = ${PROJECT_ID}`;
   return project || null;
 }
 
 export async function getPhases() {
-  if (!db) return [];
-  const allPhases = await db.select().from(phases).where(eq(phases.projectId, PROJECT_ID)).orderBy(asc(phases.sortOrder));
-  const allTasks = await db.select().from(tasks).orderBy(asc(tasks.sortOrder));
-  return allPhases.map(phase => ({
+  if (!sql) return [];
+  const allPhases = await sql`SELECT * FROM phases WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  const allTasks = await sql`SELECT * FROM tasks WHERE phase_id IN (SELECT id FROM phases WHERE project_id = ${PROJECT_ID}) ORDER BY sort_order`;
+  return allPhases.map((phase: any) => ({
     ...phase,
-    tasks: allTasks.filter(t => t.phaseId === phase.id),
+    // Map snake_case to camelCase for frontend compatibility
+    projectId: phase.project_id,
+    sortOrder: phase.sort_order,
+    startDate: phase.start_date,
+    endDate: phase.end_date,
+    tasks: allTasks
+      .filter((t: any) => t.phase_id === phase.id)
+      .map((t: any) => ({
+        ...t,
+        phaseId: t.phase_id,
+        assigneeId: t.assignee_id,
+        dueDate: t.due_date,
+        startDate: t.start_date,
+        actualStart: t.actual_start,
+        actualEnd: t.actual_end,
+        isMilestone: t.is_milestone,
+        inspectionRequired: t.inspection_required,
+        sortOrder: t.sort_order,
+        createdAt: t.created_at,
+      })),
   }));
 }
 
 export async function getBudgetCategories() {
-  if (!db) return [];
-  return db.select().from(budgetCategories).where(eq(budgetCategories.projectId, PROJECT_ID)).orderBy(asc(budgetCategories.sortOrder));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM budget_categories WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    allocatedAmount: r.allocated_amount,
+    typicalPct: r.typical_pct,
+    sortOrder: r.sort_order,
+  }));
 }
 
 export async function getContacts() {
-  if (!db) return [];
-  return db.select().from(contacts).where(eq(contacts.projectId, PROJECT_ID)).orderBy(desc(contacts.isPinned), asc(contacts.name));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM contacts WHERE project_id = ${PROJECT_ID} ORDER BY is_pinned DESC, name ASC`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    insuranceExpiry: r.insurance_expiry,
+    contractValue: r.contract_value,
+    isPinned: r.is_pinned,
+    createdAt: r.created_at,
+  }));
 }
 
 export async function getDecisions() {
-  if (!db) return [];
-  const allDecisions = await db.select().from(decisions).where(eq(decisions.projectId, PROJECT_ID)).orderBy(asc(decisions.deadline));
-  const allOptions = await db.select().from(decisionOptions);
-  return allDecisions.map(d => ({
+  if (!sql) return [];
+  const allDecisions = await sql`SELECT * FROM decisions WHERE project_id = ${PROJECT_ID} ORDER BY deadline ASC NULLS LAST`;
+  const allOptions = await sql`SELECT * FROM decision_options WHERE decision_id IN (SELECT id FROM decisions WHERE project_id = ${PROJECT_ID})`;
+  return allDecisions.map((d: any) => ({
     ...d,
-    options: allOptions.filter(o => o.decisionId === d.id),
+    projectId: d.project_id,
+    leadTimeDays: d.lead_time_days,
+    orderByDate: d.order_by_date,
+    decidedDate: d.decided_date,
+    decidedBy: d.decided_by,
+    linkedTaskId: d.linked_task_id,
+    createdAt: d.created_at,
+    options: allOptions
+      .filter((o: any) => o.decision_id === d.id)
+      .map((o: any) => ({
+        ...o,
+        decisionId: o.decision_id,
+        isChosen: o.is_chosen,
+        sortOrder: o.sort_order,
+      })),
   }));
 }
 
 export async function getDecisionById(id: string) {
-  if (!db) return null;
-  const [decision] = await db.select().from(decisions).where(eq(decisions.id, id));
+  if (!sql) return null;
+  const [decision] = await sql`SELECT * FROM decisions WHERE id = ${id}`;
   if (!decision) return null;
-  const options = await db.select().from(decisionOptions).where(eq(decisionOptions.decisionId, id));
-  return { ...decision, options };
+  const options = await sql`SELECT * FROM decision_options WHERE decision_id = ${id}`;
+  return {
+    ...decision,
+    projectId: decision.project_id,
+    leadTimeDays: decision.lead_time_days,
+    orderByDate: decision.order_by_date,
+    decidedDate: decision.decided_date,
+    linkedTaskId: decision.linked_task_id,
+    createdAt: decision.created_at,
+    options: options.map((o: any) => ({
+      ...o,
+      decisionId: o.decision_id,
+      isChosen: o.is_chosen,
+      sortOrder: o.sort_order,
+    })),
+  };
 }
 
 export async function getPlanningData() {
-  if (!db) return { conditions: [], cilSteps: [] };
-  const conds = await db.select().from(planningConditions).where(eq(planningConditions.projectId, PROJECT_ID)).orderBy(asc(planningConditions.conditionNumber));
-  const steps = await db.select().from(cilSteps).where(eq(cilSteps.projectId, PROJECT_ID)).orderBy(asc(cilSteps.stepNumber));
-  return { conditions: conds, cilSteps: steps };
+  if (!sql) return { conditions: [], cilSteps: [] };
+  const conditions = await sql`SELECT * FROM planning_conditions WHERE project_id = ${PROJECT_ID} ORDER BY condition_number`;
+  const steps = await sql`SELECT * FROM cil_steps WHERE project_id = ${PROJECT_ID} ORDER BY step_number`;
+  return {
+    conditions: conditions.map((c: any) => ({
+      ...c,
+      projectId: c.project_id,
+      conditionNumber: c.condition_number,
+      conditionType: c.condition_type,
+      submissionDate: c.submission_date,
+      decisionDate: c.decision_date,
+      createdAt: c.created_at,
+    })),
+    cilSteps: steps.map((s: any) => ({
+      ...s,
+      projectId: s.project_id,
+      stepNumber: s.step_number,
+      formName: s.form_name,
+      submittedDate: s.submitted_date,
+      confirmedDate: s.confirmed_date,
+      isBlocking: s.is_blocking,
+      createdAt: s.created_at,
+    })),
+  };
 }
 
 export async function getInspections() {
-  if (!db) return [];
-  return db.select().from(inspections).where(eq(inspections.projectId, PROJECT_ID)).orderBy(asc(inspections.sortOrder));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM inspections WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    linkedTaskId: r.linked_task_id,
+    scheduledDate: r.scheduled_date,
+    resultNotes: r.result_notes,
+    isCustom: r.is_custom,
+    sortOrder: r.sort_order,
+    createdAt: r.created_at,
+  }));
 }
 
 export async function getVATData() {
-  if (!db) return { entries: [], totalReclaimable: 0, counts: { total: 0, reclaimable: 0, needsReview: 0, nonReclaimable: 0 } };
-  const entries = await db.select().from(vatEntries).where(eq(vatEntries.projectId, PROJECT_ID));
-  const reclaimable = entries.filter(e => e.reclaimable === 'yes');
-  const needsReview = entries.filter(e => e.reclaimable === 'needs_review');
-  const nonReclaimable = entries.filter(e => e.reclaimable === 'no');
+  if (!sql) return { entries: [], totalReclaimable: 0, counts: { total: 0, reclaimable: 0, needsReview: 0, nonReclaimable: 0 } };
+  const entries = await sql`SELECT * FROM vat_entries WHERE project_id = ${PROJECT_ID}`;
+  const reclaimable = entries.filter((e: any) => e.reclaimable === 'yes');
+  const needsReview = entries.filter((e: any) => e.reclaimable === 'needs_review');
+  const nonReclaimable = entries.filter((e: any) => e.reclaimable === 'no');
   return {
-    entries,
-    totalReclaimable: reclaimable.reduce((sum, e) => sum + e.vatAmount, 0),
+    entries: entries.map((e: any) => ({
+      ...e,
+      projectId: e.project_id,
+      budgetEntryId: e.budget_entry_id,
+      invoiceNumber: e.invoice_number,
+      supplierName: e.supplier_name,
+      supplierVatNumber: e.supplier_vat_number,
+      netAmount: e.net_amount,
+      vatAmount: e.vat_amount,
+      invoiceTotal: e.invoice_total,
+      invoiceDate: e.invoice_date,
+      hasClaimantNameAddress: e.has_claimant_name_address,
+      receiptPath: e.receipt_path,
+      createdAt: e.created_at,
+    })),
+    totalReclaimable: reclaimable.reduce((sum: number, e: any) => sum + (e.vat_amount || 0), 0),
     counts: { total: entries.length, reclaimable: reclaimable.length, needsReview: needsReview.length, nonReclaimable: nonReclaimable.length },
   };
 }
 
 export async function getDiaryEntries() {
-  if (!db) return [];
-  return db.select().from(diaryEntries).where(eq(diaryEntries.projectId, PROJECT_ID)).orderBy(desc(diaryEntries.entryDate));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM diary_entries WHERE project_id = ${PROJECT_ID} ORDER BY entry_date DESC`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    entryDate: r.entry_date,
+    weatherTemp: r.weather_temp,
+    weatherConditions: r.weather_conditions,
+    weatherWind: r.weather_wind,
+    workersOnSite: r.workers_on_site,
+    workCompleted: r.work_completed,
+    healthSafety: r.health_safety,
+    createdBy: r.created_by,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
 }
 
 export async function getPhotos() {
-  if (!db) return [];
-  return db.select().from(photos).where(eq(photos.projectId, PROJECT_ID)).orderBy(desc(photos.createdAt));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM photos WHERE project_id = ${PROJECT_ID} ORDER BY created_at DESC`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    diaryEntryId: r.diary_entry_id,
+    filePath: r.file_path,
+    thumbnailPath: r.thumbnail_path,
+    takenAt: r.taken_at,
+    photoType: r.photo_type,
+    uploadedBy: r.uploaded_by,
+    createdAt: r.created_at,
+  }));
 }
 
 export async function getSnags() {
-  if (!db) return [];
-  return db.select().from(snags).where(eq(snags.projectId, PROJECT_ID)).orderBy(desc(snags.createdAt));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM snags WHERE project_id = ${PROJECT_ID} ORDER BY created_at DESC`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    photoIds: r.photo_ids,
+    responsibleContact: r.responsible_contact,
+    dateFound: r.date_found,
+    resolutionPhotoIds: r.resolution_photo_ids,
+    resolutionDate: r.resolution_date,
+    resolutionNotes: r.resolution_notes,
+    verifiedBy: r.verified_by,
+    shareToken: r.share_token,
+    createdAt: r.created_at,
+  }));
 }
 
 export async function getDocuments() {
-  if (!db) return [];
-  return db.select().from(documents).where(eq(documents.projectId, PROJECT_ID)).orderBy(desc(documents.uploadedAt));
+  if (!sql) return [];
+  const rows = await sql`SELECT * FROM documents WHERE project_id = ${PROJECT_ID} ORDER BY uploaded_at DESC`;
+  return rows.map((r: any) => ({
+    ...r,
+    projectId: r.project_id,
+    filePath: r.file_path,
+    fileSize: r.file_size,
+    mimeType: r.mime_type,
+    uploadedBy: r.uploaded_by,
+    uploadedAt: r.uploaded_at,
+  }));
 }
