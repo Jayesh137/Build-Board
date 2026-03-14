@@ -1,1 +1,3 @@
-export const DB_VERSION = '0.0.1';
+export * from './schema';
+export * from './relations';
+export { seedProject } from './seed';
