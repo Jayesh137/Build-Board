@@ -110,7 +110,7 @@
       <div class="flex h-14 items-center gap-3 border-b border-zinc-200 px-4 dark:border-zinc-800">
         {#if !sidebarCollapsed}
           <div class="flex-1 truncate">
-            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildTracker</p>
+            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</p>
           </div>
         {/if}
         <button
@@ -182,7 +182,7 @@
         >
           <Menu size={20} />
         </button>
-        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildTracker</p>
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</p>
       </div>
 
       <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8">

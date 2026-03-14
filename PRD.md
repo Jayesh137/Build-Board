@@ -1,8 +1,8 @@
-# BuildTracker - Product Requirements Document
+# BuildBoard - Product Requirements Document
 
 ## Overview
 
-BuildTracker is a web application for first-time self-builders managing a UK house build from planning permission through to move-in. It replaces the patchwork of spreadsheets, WhatsApp messages, paper checklists, and filing cabinets that most self-builders currently rely on.
+BuildBoard is a web application for first-time self-builders managing a UK house build from planning permission through to move-in. It replaces the patchwork of spreadsheets, WhatsApp messages, paper checklists, and filing cabinets that most self-builders currently rely on.
 
 **Core philosophy:** You should never have to wonder "what should I be doing next?"
 

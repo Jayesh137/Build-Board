@@ -1,4 +1,4 @@
-export const BUILDTRACKER_VERSION = '0.0.1';
+export const BUILDBOARD_VERSION = '0.0.1';
 
 export * from './types';
 export * from './schemas';

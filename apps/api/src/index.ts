@@ -127,9 +127,9 @@ app.onError((err, c) => {
 
 // Start server
 const port = parseInt(process.env.PORT || '3001', 10);
-console.log(`BuildTracker API starting on port ${port}...`);
+console.log(`BuildBoard API starting on port ${port}...`);
 serve({ fetch: app.fetch, port }, () => {
-  console.log(`BuildTracker API running at http://localhost:${port}`);
+  console.log(`BuildBoard API running at http://localhost:${port}`);
   startScheduler();
 });
 

@@ -1,8 +1,8 @@
-# BuildTracker - Architecture
+# BuildBoard - Architecture
 
 ## System Overview
 
-BuildTracker is a monorepo with two applications and two shared packages:
+BuildBoard is a monorepo with two applications and two shared packages:
 
 ```
 ┌─────────────────────────────┐
@@ -299,7 +299,7 @@ A typed fetch wrapper in `src/lib/api-client.ts` handles all calls from SvelteKi
 // apps/web/src/lib/api-client.ts
 import type { Budget, Task, VATEntry } from '@buildtracker/shared';
 
-const API_URL = process.env.API_URL; // e.g. https://buildtracker-api.up.railway.app
+const API_URL = process.env.API_URL; // e.g. https://buildboard-api.up.railway.app
 
 export function createApiClient(authToken: string) {
   async function get<T>(path: string): Promise<T> {
@@ -349,7 +349,7 @@ export async function load({ locals }) {
 ### Base URL
 
 ```
-https://buildtracker-api.up.railway.app/api/v1
+https://buildboard-api.up.railway.app/api/v1
 ```
 
 ### Authentication
@@ -860,7 +860,7 @@ export function startScheduler() {
 All files stored in Supabase Storage:
 
 ```
-buildtracker/
+buildboard/
 └── {project_id}/
     ├── documents/{folder}/{filename}
     ├── photos/{yyyy-mm-dd}/{uuid}.{ext}

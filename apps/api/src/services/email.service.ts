@@ -3,7 +3,7 @@ import type { Alert } from './alerts.service.js';
 
 const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
-const FROM_EMAIL = process.env.EMAIL_FROM || 'BuildTracker <alerts@buildtracker.app>';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'BuildBoard <alerts@buildboard.app>';
 
 function escapeHtml(str: string): string {
   return str
@@ -91,7 +91,7 @@ function buildDigestHtml(projectName: string, alerts: Alert[]): string {
   <div style="max-width: 600px; margin: 0 auto; padding: 24px;">
     <div style="background: white; border-radius: 12px; padding: 32px; margin-bottom: 16px;">
       <h1 style="margin: 0 0 4px 0; font-size: 22px; color: #111827;">
-        BuildTracker Daily Digest
+        BuildBoard Daily Digest
       </h1>
       <p style="margin: 0 0 24px 0; font-size: 14px; color: #6B7280;">
         ${escapeHtml(projectName)} &middot; ${date}
@@ -105,7 +105,7 @@ function buildDigestHtml(projectName: string, alerts: Alert[]): string {
     </div>
 
     <p style="text-align: center; font-size: 12px; color: #9CA3AF;">
-      Sent by BuildTracker. Manage notification preferences in your project settings.
+      Sent by BuildBoard. Manage notification preferences in your project settings.
     </p>
   </div>
 </body>
@@ -178,7 +178,7 @@ export async function sendDeadlineReminder(
       </p>
     </div>
     <p style="text-align: center; font-size: 12px; color: #9CA3AF; margin-top: 16px;">
-      Sent by BuildTracker. Manage notification preferences in your project settings.
+      Sent by BuildBoard. Manage notification preferences in your project settings.
     </p>
   </div>
 </body>

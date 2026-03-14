@@ -84,7 +84,7 @@
   <header class="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
     <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
       <div>
-        <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">BuildTracker</p>
+        <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</p>
         <p class="text-xs text-zinc-500 dark:text-zinc-400">Snag List</p>
       </div>
       {#if project}
@@ -192,7 +192,7 @@
       <!-- Footer branding -->
       <div class="mt-8 border-t border-zinc-200 pt-4 text-center dark:border-zinc-800">
         <p class="text-xs text-zinc-400 dark:text-zinc-500">
-          Powered by <span class="font-medium text-zinc-500 dark:text-zinc-400">BuildTracker</span>
+          Powered by <span class="font-medium text-zinc-500 dark:text-zinc-400">BuildBoard</span>
         </p>
       </div>
     {/if}

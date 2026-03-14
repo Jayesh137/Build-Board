@@ -11,7 +11,7 @@
 <div class="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
   <div class="w-full max-w-sm">
     <div class="mb-8 text-center">
-      <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">BuildTracker</h1>
+      <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</h1>
       <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Sign in to manage your build project</p>
     </div>
 

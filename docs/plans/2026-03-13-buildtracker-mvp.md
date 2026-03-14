@@ -1,8 +1,8 @@
-# BuildTracker MVP Implementation Plan
+# BuildBoard MVP Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build the full BuildTracker MVP — a web app for managing a UK self-build house project covering timeline, budget, VAT reclaim, planning/CIL compliance, documents, contacts, decisions, inspections, diary, photos, snags, and a dashboard.
+**Goal:** Build the full BuildBoard MVP — a web app for managing a UK self-build house project covering timeline, budget, VAT reclaim, planning/CIL compliance, documents, contacts, decisions, inspections, diary, photos, snags, and a dashboard.
 
 **Architecture:** pnpm monorepo with SvelteKit frontend (`apps/web`) and Hono REST API (`apps/api`). Shared database schema (`packages/db`) and utilities (`packages/shared`). Supabase for PostgreSQL, Auth, and Storage. See `ARCHITECTURE.md` for full details.
 
@@ -819,7 +819,7 @@ Commit: `test: E2E tests for critical user flows`
 
 **Steps:**
 1. Set up Supabase project (production). Run migrations. Configure auth (enable email/password, set redirect URLs).
-2. Create Supabase Storage bucket `buildtracker` with appropriate policies.
+2. Create Supabase Storage bucket `buildboard` with appropriate policies.
 3. Set up Railway project for API. Connect to GitHub repo. Set environment variables. Deploy.
 4. Set up Vercel project for frontend. Connect to GitHub repo. Set `API_URL` to Railway URL. Set Supabase env vars. Deploy.
 5. Set up Resend with a sending domain.

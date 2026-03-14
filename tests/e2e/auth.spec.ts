@@ -19,7 +19,7 @@ test.describe('Auth Flow', () => {
       await page.goto('/auth/login');
 
       // Page heading
-      await expect(page.locator('h1', { hasText: 'BuildTracker' })).toBeVisible();
+      await expect(page.locator('h1', { hasText: 'BuildBoard' })).toBeVisible();
       await expect(page.locator('text=Sign in to manage your build project')).toBeVisible();
 
       // Email field
@@ -65,7 +65,7 @@ test.describe('Auth Flow', () => {
       await page.goto('/auth/signup');
 
       // Page heading
-      await expect(page.locator('h1', { hasText: 'BuildTracker' })).toBeVisible();
+      await expect(page.locator('h1', { hasText: 'BuildBoard' })).toBeVisible();
       await expect(page.locator('text=Create your account to start tracking')).toBeVisible();
 
       // Email field

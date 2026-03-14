@@ -1,4 +1,4 @@
-# BuildTracker - UI/UX Design System
+# BuildBoard - UI/UX Design System
 
 ## Design DNA
 
