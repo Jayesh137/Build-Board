@@ -15,6 +15,7 @@
   import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
   import Clock from 'lucide-svelte/icons/clock';
   import BookOpen from 'lucide-svelte/icons/book-open';
+  import Info from 'lucide-svelte/icons/info';
 
 
   interface Phase {
@@ -56,6 +57,25 @@
   const phases: Phase[] = data.phases ?? [];
   const phaseGuidance: PhaseGuidanceData | null = data.phaseGuidance ?? null;
   const currentPhaseName: string | null = data.currentPhaseName ?? null;
+
+  // Feature E: Phase reassurance messages
+  const phaseReassurance: Record<string, string> = {
+    'Pre-Construction': 'This phase is mostly paperwork \u2014 it feels slow, but getting it right prevents expensive problems later.',
+    'Planning': 'This phase is mostly paperwork \u2014 it feels slow, but getting it right prevents expensive problems later.',
+    'Groundworks': 'Your foundations will look tiny. Everyone says this. The house will feel much bigger once walls go up.',
+    'Foundations': 'Your foundations will look tiny. Everyone says this. The house will feel much bigger once walls go up.',
+    'Superstructure': 'Superstructure feels slow \u2014 bricklayers work methodically. Don\'t panic.',
+    'Weathertight': 'Getting weathertight is the biggest milestone. Everything accelerates after this.',
+    'Roof': 'Getting weathertight is the biggest milestone. Everything accelerates after this.',
+    'First Fix': 'First fix feels invisible \u2014 all the work is hidden behind walls. But it\'s critical.',
+    'Plastering': 'Drying out takes patience. Rushing to decorate causes cracking and peeling.',
+    'Drying Out': 'Drying out takes patience. Rushing to decorate causes cracking and peeling.',
+    'Second Fix': 'Second fix always takes longer than expected. Every self-builder says this.',
+    'Second Fix & Finishes': 'Second fix always takes longer than expected. Every self-builder says this.',
+    'Finishes': 'Second fix always takes longer than expected. Every self-builder says this.',
+    'External Works': 'Landscaping can be phased \u2014 do the essentials now and improve over time.',
+    'Completion': 'You\'re nearly there. The snagging list feels endless, but each tick brings you closer to home.',
+  };
 
   // Phase briefing state
   let briefingExpanded = $state(true);
@@ -142,6 +162,17 @@
     if (tasks.length === 0) return 0;
     const done = tasks.filter((t: Task) => t.status === 'done').length;
     return Math.round((done / tasks.length) * 100);
+  }
+
+  // Check if a phase is the current active phase
+  function isCurrentPhase(phase: Phase): boolean {
+    if (!currentPhaseName) return false;
+    return phase.name === currentPhaseName;
+  }
+
+  // Get reassurance message for a phase
+  function getReassurance(phaseName: string): string | null {
+    return phaseReassurance[phaseName] ?? null;
   }
 
   const firstTip = $derived(phaseGuidance?.tips?.[0] ?? null);
@@ -345,6 +376,8 @@
         {@const progress = phaseProgress(phase)}
         {@const taskCount = phase.tasks?.length ?? 0}
         {@const isExpanded = expandedPhases.has(phase.id)}
+        {@const isCurrent = isCurrentPhase(phase)}
+        {@const reassurance = isCurrent ? getReassurance(phase.name) : null}
         <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm border-l-4 {phaseBorderColor(phase)} dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
           <!-- Phase header -->
           <button
@@ -371,6 +404,14 @@
               </span>
             {/if}
           </button>
+
+          <!-- Feature E: Reassurance message for current phase -->
+          {#if reassurance && isExpanded}
+            <div class="flex items-start gap-2 px-5 pb-3 -mt-1">
+              <Info size={13} class="text-zinc-400 dark:text-zinc-500 flex-shrink-0 mt-0.5" />
+              <p class="text-sm italic text-zinc-500 dark:text-zinc-400">{reassurance}</p>
+            </div>
+          {/if}
 
           <!-- Tasks -->
           {#if isExpanded}

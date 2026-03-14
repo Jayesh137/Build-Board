@@ -18,6 +18,10 @@
   import ChevronRight from 'lucide-svelte/icons/chevron-right';
   import CircleAlert from 'lucide-svelte/icons/circle-alert';
   import Folder from 'lucide-svelte/icons/folder';
+  import Compass from 'lucide-svelte/icons/compass';
+  import XIcon from 'lucide-svelte/icons/x';
+  import FileCheck from 'lucide-svelte/icons/file-check';
+  import Circle from 'lucide-svelte/icons/circle';
 
   interface Document {
     id: string;
@@ -41,11 +45,31 @@
 
   const documents: Document[] = data.documents ?? [];
   const requiredDocs: RequiredDoc[] = data.requiredDocs ?? [];
+  const currentBuildPhase: string | null = data.currentBuildPhase ?? null;
 
   let showUploadModal = $state(false);
   let selectedFolder = $state('All');
   let requiredExpanded = $state(false);
   let uploadFolder = $state('Other');
+
+  // Feature A: "What's Next" dismissable
+  let whatsNextDismissed = $state(false);
+
+  // Feature G: Phase document prompts
+  let phaseDocsExpanded = $state(true);
+
+  const phaseDocuments: Record<string, string[]> = {
+    'Pre-Construction': ['Planning permission decision notice', 'Building regulations approval', 'Structural engineer calculations', 'Site insurance certificate', 'Structural warranty confirmation', 'Party wall agreement (if applicable)', 'Soil survey report'],
+    'Groundworks': ['Foundation design drawings', 'Drainage layout plan', 'Site setup plan'],
+    'Foundations': ['Foundation inspection records', 'Concrete delivery tickets'],
+    'Superstructure': ['Window order confirmation', 'Steelwork design calculations'],
+    'First Fix': ['Kitchen layout plan', 'Bathroom layout plans', 'Electrical layout plan', 'Heating system design'],
+    'Completion': ['Electrical installation certificate (Part P)', 'Gas safety certificate', 'Boiler commissioning certificate', 'EPC certificate', 'Air tightness test result', 'Building control completion certificate', 'Structural warranty final certificate'],
+  };
+
+  const currentPhaseDocList = $derived(
+    currentBuildPhase ? (phaseDocuments[currentBuildPhase] ?? null) : null
+  );
 
   const folders = [
     'All',
@@ -107,6 +131,68 @@
       Upload
     </Button>
   </div>
+
+  <!-- Feature A: What's Next prompt -->
+  {#if !whatsNextDismissed}
+    <div class="flex items-start gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-800/50 py-3 px-4">
+      <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-200/60 dark:bg-zinc-700/60">
+        <Compass size={14} class="text-zinc-500 dark:text-zinc-400" />
+      </div>
+      <p class="flex-1 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        Upload key documents as you get them &mdash; planning approval, insurance certificates, contracts. Everything in one place.
+      </p>
+      <button
+        onclick={() => (whatsNextDismissed = true)}
+        class="flex-shrink-0 rounded-lg p-1 text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+      >
+        <XIcon size={14} />
+      </button>
+    </div>
+  {/if}
+
+  <!-- Feature G: Phase document prompts -->
+  {#if currentPhaseDocList && currentPhaseDocList.length > 0}
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <button
+        class="flex w-full items-center justify-between px-5 py-4"
+        onclick={() => (phaseDocsExpanded = !phaseDocsExpanded)}
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+            <FileCheck size={18} class="text-indigo-500 dark:text-indigo-400" />
+          </div>
+          <div class="text-left">
+            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Documents you should have
+            </p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+              Based on your current phase: {currentBuildPhase}
+            </p>
+          </div>
+        </div>
+        <div class="text-zinc-400">
+          {#if phaseDocsExpanded}
+            <ChevronDown size={18} />
+          {:else}
+            <ChevronRight size={18} />
+          {/if}
+        </div>
+      </button>
+
+      {#if phaseDocsExpanded}
+        <div class="border-t border-zinc-100 px-5 py-4 dark:border-zinc-800">
+          <div class="space-y-1">
+            {#each currentPhaseDocList as docName}
+              <div class="flex items-center gap-3 rounded-lg px-3 py-2">
+                <Circle size={14} class="text-zinc-300 dark:text-zinc-600 flex-shrink-0" />
+                <p class="text-sm text-zinc-700 dark:text-zinc-300">{docName}</p>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
 
   <!-- Required documents banner -->
   {#if requiredDocs.length > 0}

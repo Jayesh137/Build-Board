@@ -5,6 +5,12 @@
   import Shield from 'lucide-svelte/icons/shield';
   import Receipt from 'lucide-svelte/icons/receipt';
   import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+  import Compass from 'lucide-svelte/icons/compass';
+  import XIcon from 'lucide-svelte/icons/x';
+  import Info from 'lucide-svelte/icons/info';
+  import CircleCheck from 'lucide-svelte/icons/circle-check';
+  import TriangleAlert from 'lucide-svelte/icons/triangle-alert';
+  import Lightbulb from 'lucide-svelte/icons/lightbulb';
 
   interface BudgetSummary {
     totalBudget: number;
@@ -28,6 +34,9 @@
 
   const summary: BudgetSummary | null = data.summary;
   const categories: BudgetCategory[] = data.categories ?? [];
+
+  // Feature A: "What's Next" dismissable
+  let whatsNextDismissed = $state(false);
 
   const fmt = new Intl.NumberFormat('en-GB', {
     style: 'currency',
@@ -62,6 +71,41 @@
     if (remainPct >= 5) return 'text-amber-600 dark:text-amber-400';
     return 'text-red-600 dark:text-red-400';
   }
+
+  // Feature F: Cost benchmarks
+  const benchmarks: Record<string, { low: number; high: number; unit: string }> = {
+    'Professional Fees': { low: 20000, high: 50000, unit: '\u00A3' },
+    'Groundworks & Foundations': { low: 25000, high: 55000, unit: '\u00A3' },
+    'Superstructure': { low: 45000, high: 120000, unit: '\u00A3' },
+    'Roof': { low: 20000, high: 45000, unit: '\u00A3' },
+    'First Fix': { low: 25000, high: 65000, unit: '\u00A3' },
+    'Second Fix & Finishes': { low: 40000, high: 100000, unit: '\u00A3' },
+    'External Works': { low: 15000, high: 45000, unit: '\u00A3' },
+    'Utilities & Connections': { low: 8000, high: 20000, unit: '\u00A3' },
+    'Contingency': { low: 35000, high: 70000, unit: '\u00A3' },
+  };
+
+  function formatBenchmark(val: number): string {
+    return '\u00A3' + val.toLocaleString('en-GB');
+  }
+
+  function benchmarkStatus(allocated: number, low: number, high: number): 'below' | 'within' | 'above' {
+    const allocPounds = allocated / 100;
+    if (allocPounds < low) return 'below';
+    if (allocPounds > high) return 'above';
+    return 'within';
+  }
+
+  // Feature D: Smart budget warnings
+  const budgetAdvice: Record<string, string> = {
+    'Groundworks & Foundations': 'Ground conditions often surprise. If you\'re over here, review second fix finishes \u2014 this is where most people find savings.',
+    'Superstructure': 'If structural costs are high, consider simpler external finishes to compensate.',
+    'Second Fix & Finishes': 'This is where specification choices make the biggest difference. A simpler kitchen or standard bathroom fittings can save thousands.',
+    'External Works': 'Landscaping can be phased \u2014 do the essentials now and improve over time.',
+    'Professional Fees': 'Consider whether you need a full architect service for all remaining stages, or if a project manager would suffice.',
+  };
+
+  const hasEntries = $derived(categories.some(c => c.spentAmount > 0 || c.committedAmount > 0));
 </script>
 
 <div class="space-y-6">
@@ -78,6 +122,28 @@
       </Button>
     </a>
   </div>
+
+  <!-- Feature A: What's Next prompt -->
+  {#if !whatsNextDismissed}
+    <div class="flex items-start gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-800/50 py-3 px-4">
+      <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-200/60 dark:bg-zinc-700/60">
+        <Compass size={14} class="text-zinc-500 dark:text-zinc-400" />
+      </div>
+      <p class="flex-1 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        {#if !hasEntries}
+          Start by logging your first expense or quote. Every invoice you record helps track your build costs and VAT reclaim.
+        {:else}
+          Keep logging every payment. Your budget accuracy improves with each entry.
+        {/if}
+      </p>
+      <button
+        onclick={() => (whatsNextDismissed = true)}
+        class="flex-shrink-0 rounded-lg p-1 text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+      >
+        <XIcon size={14} />
+      </button>
+    </div>
+  {/if}
 
   <!-- Summary cards -->
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -168,6 +234,13 @@
           style="width: {usedPct}%"
         ></div>
       </div>
+      <!-- Feature E: Reassurance message near contingency -->
+      <div class="mt-3 flex items-start gap-2">
+        <Info size={13} class="text-zinc-400 dark:text-zinc-500 flex-shrink-0 mt-0.5" />
+        <p class="text-sm italic text-zinc-500 dark:text-zinc-400">
+          87% of self-builders exceed their initial budget. A healthy contingency is your safety net, not a failure.
+        </p>
+      </div>
     </div>
   {/if}
 
@@ -196,6 +269,9 @@
           {@const pct = budgetBarPct(total, allocated)}
           {@const spentPct = budgetBarPct(spent, allocated)}
           {@const committedPct = budgetBarPct(committed, allocated)}
+          {@const benchmark = benchmarks[category.name]}
+          {@const advice = budgetAdvice[category.name]}
+          {@const showWarning = advice && allocated > 0 && pct >= 80}
           <div class="px-5 py-4 {i > 0 ? 'border-t border-zinc-100 dark:border-zinc-800/50' : ''}">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{category.name}</span>
@@ -240,6 +316,33 @@
                 </span>
               {/if}
             </div>
+
+            <!-- Feature F: Benchmark range -->
+            {#if benchmark && allocated > 0}
+              {@const bStatus = benchmarkStatus(allocated, benchmark.low, benchmark.high)}
+              <div class="mt-2 flex items-center gap-1.5">
+                {#if bStatus === 'within'}
+                  <CircleCheck size={12} class="text-green-500 flex-shrink-0" />
+                {:else if bStatus === 'below'}
+                  <TriangleAlert size={12} class="text-amber-500 flex-shrink-0" />
+                {:else}
+                  <CircleCheck size={12} class="text-green-500 flex-shrink-0" />
+                {/if}
+                <span class="text-xs text-zinc-400 dark:text-zinc-500">
+                  UK range: {formatBenchmark(benchmark.low)} &mdash; {formatBenchmark(benchmark.high)}
+                </span>
+              </div>
+            {/if}
+
+            <!-- Feature D: Smart budget warning -->
+            {#if showWarning}
+              <div class="mt-2.5 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200/40 dark:border-amber-800/30 px-3 py-2">
+                <Lightbulb size={13} class="text-amber-500 flex-shrink-0 mt-0.5" />
+                <p class="text-xs text-amber-700 dark:text-amber-400">
+                  <span class="font-medium">Tip:</span> {advice}
+                </p>
+              </div>
+            {/if}
           </div>
         {/each}
       </div>

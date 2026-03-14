@@ -9,6 +9,8 @@
   import ChevronDown from 'lucide-svelte/icons/chevron-down';
   import ChevronUp from 'lucide-svelte/icons/chevron-up';
   import HelpCircle from 'lucide-svelte/icons/circle-help';
+  import Compass from 'lucide-svelte/icons/compass';
+  import XIcon from 'lucide-svelte/icons/x';
 
   interface VATSummary {
     totalReclaimable: number;
@@ -38,6 +40,9 @@
 
   const summary: VATSummary | null = data.summary;
   const entries: VATEntry[] = data.entries ?? [];
+
+  // Feature A: "What's Next" dismissable
+  let whatsNextDismissed = $state(false);
 
   const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
@@ -118,6 +123,24 @@
       </a>
     </div>
   </div>
+
+  <!-- Feature A: What's Next prompt -->
+  {#if !whatsNextDismissed}
+    <div class="flex items-start gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-800/50 py-3 px-4">
+      <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-200/60 dark:bg-zinc-700/60">
+        <Compass size={14} class="text-zinc-500 dark:text-zinc-400" />
+      </div>
+      <p class="flex-1 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        Every eligible material purchase can be reclaimed at 20% VAT. Log invoices as you go &mdash; you'll need them all for your HMRC claim.
+      </p>
+      <button
+        onclick={() => (whatsNextDismissed = true)}
+        class="flex-shrink-0 rounded-lg p-1 text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+      >
+        <XIcon size={14} />
+      </button>
+    </div>
+  {/if}
 
   <!-- Summary card -->
   <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-5 lg:p-6">

@@ -16,6 +16,7 @@
   import ThumbsUp from 'lucide-svelte/icons/thumbs-up';
   import ThumbsDown from 'lucide-svelte/icons/thumbs-down';
   import LinkIcon from 'lucide-svelte/icons/link';
+  import Info from 'lucide-svelte/icons/info';
 
   interface DecisionOption {
     id: string;
@@ -49,6 +50,30 @@
 
   let showAddOption = $state(false);
   let showEditDecision = $state(false);
+
+  // Feature B: Decision help text
+  const decisionHelp: Record<string, string> = {
+    'Heating system': 'Air source heat pumps have higher upfront cost (\u00A38-14k) but lower running costs. Gas boilers are cheaper to install (\u00A32-4k) but may not meet future building regs. Heat pumps qualify for the Boiler Upgrade Scheme (\u00A37,500 grant).',
+    'Window': 'Triple glazing costs ~20% more than double but significantly reduces heat loss and noise. Aluminium frames are slimmest and most durable. Timber is warmest. uPVC is cheapest.',
+    'Kitchen': 'German kitchens (Nobilia, Schuller) offer excellent quality at mid-range prices. British bespoke is premium. IKEA is budget-friendly and surprisingly durable.',
+    'External brick': 'London stock brick blends with local character. Modern facing bricks offer more colour choice. Render is cheaper but needs maintenance every 10-15 years.',
+    'Roof tile': 'Natural slate is premium and lasts 100+ years. Concrete tiles are budget-friendly (40-60 year life). Clay tiles are mid-range with good character.',
+    'Flooring': 'Engineered wood is more stable than solid and works with underfloor heating. Porcelain tiles are virtually indestructible. Polished concrete is trendy but cold without UFH.',
+    'Staircase': 'Timber is most cost-effective. Steel and glass is contemporary but \u00A35-15k more. Consider acoustic performance between floors.',
+    'Main contractor': 'A main contractor manages everything (simpler, 15-25% markup). Self-managing trades is cheaper but demands significant time and construction knowledge.',
+  };
+
+  // Find matching help text based on decision title
+  const matchedHelp = $derived(() => {
+    if (!decision) return null;
+    const titleLower = decision.title.toLowerCase();
+    for (const [key, value] of Object.entries(decisionHelp)) {
+      if (titleLower.includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+    return null;
+  });
 
   function formatDate(dateStr: string | null): string {
     if (!dateStr) return '--';
@@ -108,6 +133,23 @@
     { value: 'Appliances', label: 'Appliances' },
     { value: 'Other', label: 'Other' },
   ];
+
+  // Determine cheapest/most expensive for visual recommendation
+  const optionCosts = $derived(
+    options
+      .filter((o) => o.costPence !== null)
+      .map((o) => ({ id: o.id, cost: o.costPence! }))
+  );
+  const cheapestId = $derived(
+    optionCosts.length > 0
+      ? optionCosts.reduce((min, o) => (o.cost < min.cost ? o : min)).id
+      : null
+  );
+  const mostExpensiveId = $derived(
+    optionCosts.length > 1
+      ? optionCosts.reduce((max, o) => (o.cost > max.cost ? o : max)).id
+      : null
+  );
 </script>
 
 <div class="space-y-6">
@@ -141,6 +183,18 @@
         Edit
       </Button>
     </div>
+
+    <!-- Feature B: Contextual decision help -->
+    {#if matchedHelp()}
+      <div class="flex items-start gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-800/50 py-3 px-4">
+        <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100/60 dark:bg-blue-900/30">
+          <Info size={14} class="text-blue-600 dark:text-blue-400" />
+        </div>
+        <p class="flex-1 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          {matchedHelp()}
+        </p>
+      </div>
+    {/if}
 
     <!-- Key info cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -225,6 +279,8 @@
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {#each options as option}
             {@const isChosen = decision.chosenOptionId === option.id}
+            {@const isCheapest = cheapestId === option.id && optionCosts.length > 1}
+            {@const isMostExpensive = mostExpensiveId === option.id && optionCosts.length > 1}
             <Card class="{isChosen ? 'border-green-400 ring-1 ring-green-400 dark:border-green-600 dark:ring-green-600' : ''}">
               <div class="space-y-3">
                 <div class="flex items-start justify-between gap-2">
@@ -234,12 +290,24 @@
                       <p class="text-xs text-zinc-500 dark:text-zinc-400">{option.supplier}</p>
                     {/if}
                   </div>
-                  {#if isChosen}
-                    <Badge variant="done" size="sm">
-                      <Check size={12} />
-                      Chosen
-                    </Badge>
-                  {/if}
+                  <div class="flex items-center gap-1.5">
+                    {#if isCheapest && !isChosen}
+                      <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/20 px-2 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-400">
+                        Best value
+                      </span>
+                    {/if}
+                    {#if isMostExpensive && !isChosen}
+                      <span class="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-400">
+                        Premium
+                      </span>
+                    {/if}
+                    {#if isChosen}
+                      <Badge variant="done" size="sm">
+                        <Check size={12} />
+                        Chosen
+                      </Badge>
+                    {/if}
+                  </div>
                 </div>
 
                 {#if option.costPence !== null}
@@ -254,7 +322,7 @@
                       <ThumbsUp size={12} />
                       Pros
                     </div>
-                    <p class="whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400">{option.pros}</p>
+                    <p class="whitespace-pre-wrap text-xs text-green-700 dark:text-green-400/80">{option.pros}</p>
                   </div>
                 {/if}
 
@@ -264,7 +332,7 @@
                       <ThumbsDown size={12} />
                       Cons
                     </div>
-                    <p class="whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400">{option.cons}</p>
+                    <p class="whitespace-pre-wrap text-xs text-red-700 dark:text-red-400/80">{option.cons}</p>
                   </div>
                 {/if}
 
