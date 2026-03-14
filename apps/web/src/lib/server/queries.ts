@@ -19,8 +19,8 @@ export async function getProject() {
 
 export async function getPhases() {
   if (!sql) return [];
-  const allPhases = await sql`SELECT * FROM phases WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
-  const allTasks = await sql`SELECT * FROM tasks WHERE phase_id IN (SELECT id FROM phases WHERE project_id = ${PROJECT_ID}) ORDER BY sort_order`;
+  const allPhases = await sql`SELECT id, project_id, name, sort_order, status, start_date::text, end_date::text FROM phases WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  const allTasks = await sql`SELECT id, phase_id, title, description, status, assignee_id, start_date::text, due_date::text, actual_start::text, actual_end::text, is_milestone, inspection_required, sort_order, notes, created_at FROM tasks WHERE phase_id IN (SELECT id FROM phases WHERE project_id = ${PROJECT_ID}) ORDER BY sort_order`;
   return allPhases.map((phase: any) => ({
     ...phase,
     // Map snake_case to camelCase for frontend compatibility
@@ -60,7 +60,7 @@ export async function getBudgetCategories() {
 
 export async function getContacts() {
   if (!sql) return [];
-  const rows = await sql`SELECT * FROM contacts WHERE project_id = ${PROJECT_ID} ORDER BY is_pinned DESC, name ASC`;
+  const rows = await sql`SELECT id, project_id, name, role, company, phone, email, address, website, notes, insurance_expiry::text, qualifications, contract_value, rating, is_pinned, created_at FROM contacts WHERE project_id = ${PROJECT_ID} ORDER BY is_pinned DESC, name ASC`;
   return rows.map((r: any) => ({
     ...r,
     projectId: r.project_id,
@@ -73,7 +73,7 @@ export async function getContacts() {
 
 export async function getDecisions() {
   if (!sql) return [];
-  const allDecisions = await sql`SELECT * FROM decisions WHERE project_id = ${PROJECT_ID} ORDER BY deadline ASC NULLS LAST`;
+  const allDecisions = await sql`SELECT id, project_id, title, category, status, deadline::text, lead_time_days, order_by_date::text, decided_date::text, decided_by, linked_task_id, notes, created_at FROM decisions WHERE project_id = ${PROJECT_ID} ORDER BY deadline ASC NULLS LAST`;
   const allOptions = await sql`SELECT * FROM decision_options WHERE decision_id IN (SELECT id FROM decisions WHERE project_id = ${PROJECT_ID})`;
   return allDecisions.map((d: any) => ({
     ...d,
@@ -119,8 +119,8 @@ export async function getDecisionById(id: string) {
 
 export async function getPlanningData() {
   if (!sql) return { conditions: [], cilSteps: [] };
-  const conditions = await sql`SELECT * FROM planning_conditions WHERE project_id = ${PROJECT_ID} ORDER BY condition_number`;
-  const steps = await sql`SELECT * FROM cil_steps WHERE project_id = ${PROJECT_ID} ORDER BY step_number`;
+  const conditions = await sql`SELECT id, project_id, condition_number, description, condition_type, status, submission_date::text, decision_date::text, notes, created_at FROM planning_conditions WHERE project_id = ${PROJECT_ID} ORDER BY condition_number`;
+  const steps = await sql`SELECT id, project_id, step_number, form_name, description, status, submitted_date::text, confirmed_date::text, deadline::text, is_blocking, notes, created_at FROM cil_steps WHERE project_id = ${PROJECT_ID} ORDER BY step_number`;
   return {
     conditions: conditions.map((c: any) => ({
       ...c,
@@ -146,7 +146,7 @@ export async function getPlanningData() {
 
 export async function getInspections() {
   if (!sql) return [];
-  const rows = await sql`SELECT * FROM inspections WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  const rows = await sql`SELECT id, project_id, name, type, linked_task_id, status, scheduled_date::text, result_notes, inspector, is_custom, sort_order, created_at FROM inspections WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
   return rows.map((r: any) => ({
     ...r,
     projectId: r.project_id,
