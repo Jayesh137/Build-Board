@@ -19,6 +19,10 @@ import { documentRoutes } from './routes/documents.js';
 import { diaryRoutes } from './routes/diary.js';
 import { photoRoutes } from './routes/photos.js';
 import { snagRoutes } from './routes/snags.js';
+import { alertRoutes } from './routes/alerts.js';
+import { activityRoutes } from './routes/activity.js';
+import { setupRoutes } from './routes/setup.js';
+import { startScheduler } from './jobs/scheduler.js';
 import { db } from './lib/db.js';
 import { snags } from '@buildtracker/db';
 import { eq } from 'drizzle-orm';
@@ -80,6 +84,11 @@ app.get('/api/v1/snags/share/:token', async (c) => {
 app.use('/auth/*', auth);
 app.route('/auth', authRoutes);
 
+// Setup routes (require auth but NOT project access — user doesn't have a project yet)
+app.use('/api/v1/setup/*', auth);
+app.use('/api/v1/setup', auth);
+app.route('/api/v1/setup', setupRoutes);
+
 // Project-scoped routes (require auth + project membership)
 const projectScoped = new Hono();
 projectScoped.use('*', auth);
@@ -97,6 +106,8 @@ projectScoped.route('/documents', documentRoutes);
 projectScoped.route('/diary', diaryRoutes);
 projectScoped.route('/photos', photoRoutes);
 projectScoped.route('/snags', snagRoutes);
+projectScoped.route('/alerts', alertRoutes);
+projectScoped.route('/activity', activityRoutes);
 
 // Mount project-scoped routes
 app.route('/api/v1/projects/:projectId', projectScoped);
@@ -115,6 +126,7 @@ const port = parseInt(process.env.PORT || '3001', 10);
 console.log(`BuildTracker API starting on port ${port}...`);
 serve({ fetch: app.fetch, port }, () => {
   console.log(`BuildTracker API running at http://localhost:${port}`);
+  startScheduler();
 });
 
 export default app;
