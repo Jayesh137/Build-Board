@@ -21,15 +21,15 @@ export const load: PageServerLoad = async () => {
       api.get<any>('').catch(() => null),
       api.get<any>('/phases').catch(() => []),
       api.get<any>('/budget').catch(() => null),
-      api.get<any>('/decisions').catch(() => []),
+      api.get<any>('/decisions').catch(() => ({ decisions: [] })),
       api.get<any>('/snags').catch(() => ({ snags: [] })),
       api.get<any>('/planning').catch(() => ({ conditions: [] })),
       api.get<any>('/vat').catch(() => null),
       api.get<any>('/alerts').catch(() => ({ alerts: [] })),
     ]);
 
-    // Calculate progress from actual task data
-    const phases = Array.isArray(phasesData) ? phasesData : (phasesData?.phases || []);
+    // GET /phases returns array directly
+    const phases = Array.isArray(phasesData) ? phasesData : [];
     let totalTasks = 0;
     let doneTasks = 0;
     let currentPhase = 'Phase A: Pre-Construction';
@@ -49,28 +49,39 @@ export const load: PageServerLoad = async () => {
 
     const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-    // Budget summary
+    // GET /budget returns { categories: [...] }
+    // Each category has: spent, committed, allocatedAmount
+    const budgetCategories = budgetData?.categories ?? [];
+    const totalSpent = budgetCategories.reduce((sum: number, c: any) => sum + (c.spent ?? 0), 0);
+    const totalCommitted = budgetCategories.reduce((sum: number, c: any) => sum + (c.committed ?? 0), 0);
+    const totalBudget = project?.totalBudget ?? 0;
+
     const budget = budgetData ? {
-      total: project?.totalBudget || 0,
-      spent: budgetData.totalSpent || 0,
-      committed: budgetData.totalCommitted || 0,
-      remaining: (project?.totalBudget || 0) - (budgetData.totalSpent || 0) - (budgetData.totalCommitted || 0),
-      contingencyRemaining: budgetData.contingencyRemaining ?? (project?.contingencyPct || 15),
-      contingencyPct: budgetData.contingencyPct ?? (project?.contingencyPct || 15),
+      total: totalBudget,
+      spent: totalSpent,
+      committed: totalCommitted,
+      remaining: totalBudget - totalSpent - totalCommitted,
+      contingencyRemaining: project?.contingencyPct ?? 15,
+      contingencyPct: project?.contingencyPct ?? 15,
     } : null;
 
-    // Counts
-    const allDecisions = Array.isArray(decisionsData) ? decisionsData : (decisionsData?.decisions || []);
+    // GET /decisions returns { decisions: [...] }
+    const allDecisions = decisionsData?.decisions ?? [];
     const decisionCount = allDecisions.filter((d: any) => d.status !== 'decided' && d.status !== 'ordered').length;
 
-    const snags = snagData?.snags || [];
+    // GET /snags returns { snags: [], counts: {} }
+    const snags = snagData?.snags ?? [];
     const snagCount = snags.filter((s: any) => s.status === 'open' || s.status === 'assigned' || s.status === 'in_progress').length;
 
-    const conditions = planningData?.conditions || [];
+    // GET /planning returns { conditions: [...], cilSteps: [...] }
+    const conditions = planningData?.conditions ?? [];
     const conditionCount = conditions.filter((c: any) => c.status !== 'discharged' && c.conditionType === 'pre_commencement').length;
 
-    const vatTotal = vatData?.totalReclaimable || 0;
-    const alerts = alertsData?.alerts || [];
+    // GET /vat returns { totalVAT, totalReclaimable, ... }
+    const vatTotal = vatData?.totalReclaimable ?? 0;
+
+    // GET /alerts returns { alerts: [...], counts: { critical, warning, info, total } }
+    const alerts = alertsData?.alerts ?? [];
 
     return {
       project: project ? { ...project, progress, currentPhase } : null,

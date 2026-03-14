@@ -5,7 +5,9 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async () => {
   try {
     const api = createApiClient();
-    const phases = await api.get<any[]>('/phases?include=tasks');
+    // GET /phases returns a JSON array directly: [{ id, name, sortOrder, status, tasks: [...] }, ...]
+    const phasesData = await api.get<any>('/phases?include=tasks');
+    const phases = Array.isArray(phasesData) ? phasesData : [];
     return { phases };
   } catch {
     return { phases: [] };

@@ -5,7 +5,9 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async () => {
   try {
     const api = createApiClient();
-    const categories = await api.get<any[]>('/budget/categories');
+    // GET /budget returns { categories: [...] }
+    const budgetData = await api.get<any>('/budget');
+    const categories = budgetData?.categories ?? [];
     return { categories };
   } catch {
     return { categories: [] };

@@ -5,11 +5,11 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async () => {
   try {
     const api = createApiClient();
-    const [documents, requiredDocs] = await Promise.all([
-      api.get('/documents').catch(() => []),
-      api.get('/documents/required').catch(() => []),
-    ]);
-    return { documents, requiredDocs };
+    // GET /documents returns { documents: [], grouped: {} }
+    const result = await api.get<any>('/documents').catch(() => ({ documents: [], grouped: {} }));
+    const documents = result?.documents ?? [];
+    // requiredDocs not available from API; pass empty array
+    return { documents, requiredDocs: [] };
   } catch {
     return { documents: [], requiredDocs: [] };
   }

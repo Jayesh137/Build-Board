@@ -13,10 +13,16 @@ export const load: PageServerLoad = async ({ url }) => {
     if (category) params.set('category', category);
     if (status) params.set('status', status);
 
-    const [entries, categories] = await Promise.all([
-      api.get(`/budget/entries?${params.toString()}`),
-      api.get('/budget/categories').catch(() => []),
+    const [entriesData, budgetData] = await Promise.all([
+      api.get<any>(`/budget/entries?${params.toString()}`),
+      api.get<any>('/budget').catch(() => ({ categories: [] })),
     ]);
+
+    // GET /budget/entries returns an array of entries
+    const entries = Array.isArray(entriesData) ? entriesData : [];
+    // GET /budget returns { categories: [...] }
+    const categories = budgetData?.categories ?? [];
+
     return { entries, categories };
   } catch {
     return { entries: [], categories: [] };

@@ -5,7 +5,9 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async () => {
   try {
     const api = createApiClient();
-    const contacts = await api.get<any[]>('/contacts');
+    // API returns { contacts: [...] }
+    const result = await api.get<any>('/contacts');
+    const contacts = result?.contacts ?? [];
     return { contacts };
   } catch {
     return { contacts: [] };
