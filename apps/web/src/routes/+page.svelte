@@ -333,79 +333,7 @@
     </div>
   </div>
 
-  <!-- Focus Now Card -->
-  {#if data.nextActions.length > 0}
-    <div class="animate-in-delay-1 rounded-xl border shadow-sm {hasCriticalActions ? 'border-red-200/60 bg-red-50/30 dark:border-red-900/30 dark:bg-red-950/10' : 'border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-900'}" style="border-left: 4px solid {hasCriticalActions ? 'rgb(239 68 68)' : 'rgb(99 102 241)'};">
-      <div class="p-5 lg:p-6">
-        <div class="mb-4 flex items-center gap-2.5">
-          <Target size={18} class={hasCriticalActions ? 'text-red-500' : 'text-indigo-500'} />
-          <p class="text-[11px] uppercase tracking-wider font-medium {hasCriticalActions ? 'text-red-600 dark:text-red-400' : 'text-indigo-600 dark:text-indigo-400'}">Focus Now</p>
-        </div>
-
-        {#if primaryAction}
-          <!-- Primary action -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2.5 flex-wrap">
-                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  {primaryAction.title}
-                </h3>
-                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium {priorityBadgeClasses(primaryAction.priority)}">
-                  {primaryAction.priority}
-                </span>
-              </div>
-              <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                {primaryAction.reason}
-              </p>
-              <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                {primaryAction.guidance}
-              </p>
-            </div>
-            <a
-              href={primaryAction.link}
-              class="mt-1 shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600"
-            >
-              View Details
-              <ArrowRight size={14} />
-            </a>
-          </div>
-
-          <!-- Secondary actions -->
-          {#if secondaryActions.length > 0}
-            <div class="mt-5 border-t border-zinc-200/50 pt-4 dark:border-zinc-700/50">
-              <p class="mb-2.5 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Also needs attention</p>
-              <div class="space-y-2">
-                {#each secondaryActions as action}
-                  <a
-                    href={action.link}
-                    class="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                  >
-                    <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold {priorityBadgeClasses(action.priority)}">
-                      {action.priority}
-                    </span>
-                    <span class="min-w-0 flex-1 truncate text-sm text-zinc-700 dark:text-zinc-300">{action.title}</span>
-                    <span class="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">{action.reason}</span>
-                    <ArrowRight size={14} class="shrink-0 text-zinc-300 dark:text-zinc-600" />
-                  </a>
-                {/each}
-              </div>
-            </div>
-          {/if}
-        {/if}
-      </div>
-    </div>
-  {:else}
-    <!-- All clear state -->
-    <div class="animate-in-delay-1 rounded-xl border border-green-200/60 bg-green-50/30 p-5 shadow-sm dark:border-green-900/30 dark:bg-green-950/10 lg:p-6" style="border-left: 4px solid rgb(34 197 94);">
-      <div class="flex items-center gap-3">
-        <CircleCheck size={20} class="text-green-500" />
-        <div>
-          <p class="text-sm font-semibold text-green-800 dark:text-green-300">All clear — nothing needs your attention right now</p>
-          <p class="mt-0.5 text-xs text-green-600 dark:text-green-400">Keep up the great work. Check back later for new actions.</p>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <!-- Focus Now removed from here - moved to Column 3 -->
 
   <!-- Alert Banner -->
   {#if data.alerts.length > 0}
@@ -728,6 +656,27 @@
 
     <!-- Column 3: Actions -->
     <div class="space-y-5">
+      <!-- Focus Now (compact) -->
+      {#if primaryAction}
+        <div class="animate-in rounded-xl border border-zinc-200/50 bg-white p-4 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900" style="border-left: 3px solid {hasCriticalActions ? 'rgb(239 68 68)' : 'rgb(99 102 241)'};">
+          <p class="mb-2 text-[11px] uppercase tracking-wider font-medium {hasCriticalActions ? 'text-red-500' : 'text-accent-500'}">Focus Now</p>
+          <a href={primaryAction.link} class="group block">
+            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">{primaryAction.title}</p>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">{primaryAction.guidance}</p>
+          </a>
+          {#if secondaryActions.length > 0}
+            <div class="mt-3 space-y-1.5">
+              {#each secondaryActions as action}
+                <a href={action.link} class="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors">
+                  <span class="h-1.5 w-1.5 rounded-full shrink-0 {action.priority === 'critical' ? 'bg-red-500' : action.priority === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}"></span>
+                  <span class="truncate">{action.title}</span>
+                </a>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <!-- Decisions -->
       <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
         <div class="mb-3 flex items-center justify-between">
