@@ -1,4 +1,4 @@
-import { API_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export class ApiError extends Error {
   constructor(
@@ -11,7 +11,7 @@ export class ApiError extends Error {
 }
 
 export function createApiClient(authToken: string) {
-  const baseUrl = API_URL || 'http://localhost:3001';
+  const baseUrl = env.API_URL || 'http://localhost:3001';
 
   async function get<T>(path: string): Promise<T> {
     const res = await fetch(`${baseUrl}${path}`, {
