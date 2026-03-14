@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.svelte-kit/
+
+# Environment files
+.env
+.env.local
+*.local
+
+# Turbo
+.turbo/
+
+# OS files
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
