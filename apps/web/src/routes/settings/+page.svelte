@@ -5,7 +5,13 @@
   import Input from '$lib/components/ui/Input.svelte';
   import Card from '$lib/components/ui/Card.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import { Settings, User, Trash2, Moon, Sun, Save, AlertTriangle } from 'lucide-svelte';
+  import Settings from 'lucide-svelte/icons/settings';
+  import User from 'lucide-svelte/icons/user';
+  import Trash2 from 'lucide-svelte/icons/trash-2';
+  import Moon from 'lucide-svelte/icons/moon';
+  import Sun from 'lucide-svelte/icons/sun';
+  import Save from 'lucide-svelte/icons/save';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
 
   interface Project {
     id: string;

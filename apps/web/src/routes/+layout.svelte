@@ -1,25 +1,22 @@
 <script lang="ts">
   import '../app.css';
   import type { Snippet } from 'svelte';
-  import {
-    LayoutDashboard,
-    CalendarDays,
-    ClipboardCheck,
-    Wallet,
-    Receipt,
-    FileCheck,
-    Users,
-    GitBranch,
-    FolderOpen,
-    BookOpen,
-    Camera,
-    AlertTriangle,
-    Settings,
-    LogOut,
-    Menu,
-    X,
-    ChevronLeft,
-  } from 'lucide-svelte';
+  import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
+  import CalendarDays from 'lucide-svelte/icons/calendar-days';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import Wallet from 'lucide-svelte/icons/wallet';
+  import Receipt from 'lucide-svelte/icons/receipt';
+  import FileCheck from 'lucide-svelte/icons/file-check';
+  import Users from 'lucide-svelte/icons/users';
+  import GitBranch from 'lucide-svelte/icons/git-branch';
+  import FolderOpen from 'lucide-svelte/icons/folder-open';
+  import BookOpen from 'lucide-svelte/icons/book-open';
+  import Camera from 'lucide-svelte/icons/camera';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import Settings from 'lucide-svelte/icons/settings';
+  import Menu from 'lucide-svelte/icons/menu';
+  import X from 'lucide-svelte/icons/x';
+  import ChevronLeft from 'lucide-svelte/icons/chevron-left';
   import { page } from '$app/stores';
   import { goto, invalidateAll } from '$app/navigation';
 

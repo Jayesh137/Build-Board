@@ -6,7 +6,8 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import FileUpload from '$lib/components/FileUpload.svelte';
-  import { ArrowLeft, Camera } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Camera from 'lucide-svelte/icons/camera';
 
   let { form } = $props();
 

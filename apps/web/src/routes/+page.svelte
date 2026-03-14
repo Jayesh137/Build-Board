@@ -1,22 +1,19 @@
 <script lang="ts">
   import Card from '$lib/components/ui/Card.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import {
-    Diamond,
-    CalendarDays,
-    ClipboardCheck,
-    Wallet,
-    TrendingUp,
-    Receipt,
-    AlertTriangle,
-    GitBranch,
-    CircleDot,
-    Clock,
-    ArrowRight,
-    Shield,
-    CheckCircle,
-    Info,
-  } from 'lucide-svelte';
+  import Diamond from 'lucide-svelte/icons/diamond';
+  import CalendarDays from 'lucide-svelte/icons/calendar-days';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import Wallet from 'lucide-svelte/icons/wallet';
+  import TrendingUp from 'lucide-svelte/icons/trending-up';
+  import Receipt from 'lucide-svelte/icons/receipt';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import GitBranch from 'lucide-svelte/icons/git-branch';
+  import Clock from 'lucide-svelte/icons/clock';
+  import ArrowRight from 'lucide-svelte/icons/arrow-right';
+  import Shield from 'lucide-svelte/icons/shield';
+  import CheckCircle from 'lucide-svelte/icons/circle-check';
+  import Info from 'lucide-svelte/icons/info';
 
   interface Props {
     data: {

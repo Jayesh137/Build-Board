@@ -3,7 +3,13 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { Plus, Download, Clock, Receipt, CheckCircle, AlertTriangle, XCircle } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Download from 'lucide-svelte/icons/download';
+  import Clock from 'lucide-svelte/icons/clock';
+  import Receipt from 'lucide-svelte/icons/receipt';
+  import CheckCircle from 'lucide-svelte/icons/circle-check';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import XCircle from 'lucide-svelte/icons/circle-x';
 
   interface VATSummary {
     totalReclaimable: number;

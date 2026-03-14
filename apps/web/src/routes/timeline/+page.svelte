@@ -8,7 +8,11 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import TaskRow from '$lib/components/TaskRow.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { Plus, ChevronDown, ChevronRight, Search, Filter } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import ChevronDown from 'lucide-svelte/icons/chevron-down';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import Search from 'lucide-svelte/icons/search';
+  import Filter from 'lucide-svelte/icons/filter';
 
   interface Phase {
     id: string;

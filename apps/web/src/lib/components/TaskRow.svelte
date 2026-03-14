@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ChevronRight, Diamond } from 'lucide-svelte';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import Diamond from 'lucide-svelte/icons/diamond';
 
   interface Props {
     href: string;

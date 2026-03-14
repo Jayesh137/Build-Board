@@ -5,7 +5,7 @@
   import Input from '$lib/components/ui/Input.svelte';
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
-  import { ArrowLeft } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 
   interface BudgetCategory {
     id: string;

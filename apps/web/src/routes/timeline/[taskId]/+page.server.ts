@@ -2,27 +2,22 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { task: null, dependencies: [], inspection: null };
+export const load: PageServerLoad = async ({ params }) => {
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const [task, dependencies, inspection] = await Promise.all([
       api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}`),
       api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}/dependencies`).catch(() => []),
       api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}/inspection`).catch(() => null),
     ]);
-    return { task, dependencies, inspection };
   } catch {
     return { task: null, dependencies: [], inspection: null };
   }
 };
 
 export const actions: Actions = {
-  update: async ({ request, locals, params }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  update: async ({ request, params }) => {
 
     const formData = await request.formData();
     const title = formData.get('title') as string;
@@ -39,7 +34,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.patch(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}`, {
         title,
         description: description || null,
@@ -50,7 +45,6 @@ export const actions: Actions = {
         isMilestone,
         notes: notes || null,
       });
-      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update task' });
     }

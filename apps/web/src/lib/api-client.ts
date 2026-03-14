@@ -1,6 +1,5 @@
-import { env } from '$env/dynamic/private';
-
 const PROJECT_ID = '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
+const API_BASE = 'http://localhost:3001';
 
 export class ApiError extends Error {
   constructor(
@@ -13,17 +12,18 @@ export class ApiError extends Error {
 }
 
 export function createApiClient() {
-  const baseUrl = env?.API_URL || 'http://localhost:3001';
-  const projectBase = `${baseUrl}/api/v1/projects/${PROJECT_ID}`;
+  const projectBase = `${API_BASE}/api/v1/projects/${PROJECT_ID}`;
 
   async function get<T>(path: string): Promise<T> {
-    const res = await fetch(`${projectBase}${path}`);
+    const url = path ? `${projectBase}${path}` : projectBase;
+    const res = await fetch(url);
     if (!res.ok) throw new ApiError(res.status, await res.text());
     return res.json();
   }
 
   async function post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${projectBase}${path}`, {
+    const url = path ? `${projectBase}${path}` : projectBase;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -33,7 +33,8 @@ export function createApiClient() {
   }
 
   async function patch<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${projectBase}${path}`, {
+    const url = path ? `${projectBase}${path}` : projectBase;
+    const res = await fetch(url, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -43,9 +44,8 @@ export function createApiClient() {
   }
 
   async function del(path: string): Promise<void> {
-    const res = await fetch(`${projectBase}${path}`, {
-      method: 'DELETE',
-    });
+    const url = path ? `${projectBase}${path}` : projectBase;
+    const res = await fetch(url, { method: 'DELETE' });
     if (!res.ok) throw new ApiError(res.status, await res.text());
   }
 
@@ -61,10 +61,8 @@ export function createApiClient() {
         formData.append(key, value);
       }
     }
-    const res = await fetch(`${projectBase}${path}`, {
-      method: 'POST',
-      body: formData
-    });
+    const url = path ? `${projectBase}${path}` : projectBase;
+    const res = await fetch(url, { method: 'POST', body: formData });
     if (!res.ok) throw new ApiError(res.status, await res.text());
     return res.json();
   }

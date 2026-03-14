@@ -10,11 +10,9 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import FileUpload from '$lib/components/FileUpload.svelte';
   import PhotoGrid from '$lib/components/PhotoGrid.svelte';
-  import {
-    Upload,
-    Camera,
-    X,
-  } from 'lucide-svelte';
+  import Upload from 'lucide-svelte/icons/upload';
+  import Camera from 'lucide-svelte/icons/camera';
+  import X from 'lucide-svelte/icons/x';
 
   interface Photo {
     id: string;

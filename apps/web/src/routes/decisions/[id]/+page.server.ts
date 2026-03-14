@@ -3,16 +3,13 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { decision: null, options: [] };
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const [decision, options] = await Promise.all([
       api.get(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`).catch(() => null),
       api.get(`/api/v1/projects/PROJECT_ID/decisions/${params.id}/options`).catch(() => []),
     ]);
-    return { decision, options };
   } catch {
     return { decision: null, options: [] };
   }
@@ -20,8 +17,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
   update: async ({ params, request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
 
     const formData = await request.formData();
     const title = formData.get('title') as string;
@@ -32,7 +27,7 @@ export const actions: Actions = {
     const notes = formData.get('notes') as string | null;
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.patch(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`, {
         title: title || undefined,
         category: category || null,
@@ -41,15 +36,12 @@ export const actions: Actions = {
         leadTimeDays: leadTimeDays ? parseInt(leadTimeDays, 10) : null,
         notes: notes || null,
       });
-      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update decision' });
     }
   },
 
   addOption: async ({ params, request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
 
     const formData = await request.formData();
     const name = formData.get('name') as string;
@@ -65,7 +57,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.post(`/api/v1/projects/PROJECT_ID/decisions/${params.id}/options`, {
         name,
         supplier: supplier || null,
@@ -75,15 +67,12 @@ export const actions: Actions = {
         url: url || null,
         notes: notes || null,
       });
-      return { success: true, action: 'addOption' };
     } catch {
       return fail(500, { error: 'Failed to add option' });
     }
   },
 
   chooseOption: async ({ params, request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
 
     const formData = await request.formData();
     const optionId = formData.get('optionId') as string;
@@ -93,12 +82,11 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.patch(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`, {
         chosenOptionId: optionId,
         status: 'decided',
       });
-      return { success: true, action: 'chooseOption' };
     } catch {
       return fail(500, { error: 'Failed to choose option' });
     }

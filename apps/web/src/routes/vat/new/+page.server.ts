@@ -2,17 +2,12 @@ import { createApiClient } from '$lib/api-client';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return {};
+export const load: PageServerLoad = async () => {
 
-  return {};
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  default: async ({ request }) => {
 
     const formData = await request.formData();
     const supplierName = formData.get('supplierName') as string;
@@ -36,7 +31,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       const result = await api.post('/api/v1/projects/PROJECT_ID/vat/entries', {
         supplierName,
         invoiceNumber: invoiceNumber || null,
@@ -48,7 +43,6 @@ export const actions: Actions = {
         source,
         notes: notes || null,
       });
-      return { success: true, result };
     } catch {
       return fail(500, { error: 'Failed to create VAT entry' });
     }

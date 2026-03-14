@@ -7,16 +7,14 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import {
-    Plus,
-    AlertTriangle,
-    List,
-    Columns3,
-    Share2,
-    Copy,
-    Check,
-    ChevronRight,
-  } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import List from 'lucide-svelte/icons/list';
+  import Columns3 from 'lucide-svelte/icons/columns-3';
+  import Share2 from 'lucide-svelte/icons/share-2';
+  import Copy from 'lucide-svelte/icons/copy';
+  import Check from 'lucide-svelte/icons/check';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
 
   interface Snag {
     id: string;

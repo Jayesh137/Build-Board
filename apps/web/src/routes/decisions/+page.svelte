@@ -7,14 +7,12 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import {
-    Plus,
-    GitBranch,
-    Clock,
-    AlertTriangle,
-    CalendarDays,
-    Filter,
-  } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import GitBranch from 'lucide-svelte/icons/git-branch';
+  import Clock from 'lucide-svelte/icons/clock';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import CalendarDays from 'lucide-svelte/icons/calendar-days';
+  import Filter from 'lucide-svelte/icons/filter';
 
   interface Decision {
     id: string;

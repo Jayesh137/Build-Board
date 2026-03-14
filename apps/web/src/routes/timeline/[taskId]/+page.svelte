@@ -7,7 +7,10 @@
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { ArrowLeft, Link, ClipboardCheck, Diamond } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Link from 'lucide-svelte/icons/link';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import Diamond from 'lucide-svelte/icons/diamond';
 
   interface Task {
     id: string;

@@ -2,23 +2,18 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { decisions: [] };
+export const load: PageServerLoad = async () => {
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const decisions = await api.get('/api/v1/projects/PROJECT_ID/decisions').catch(() => []);
-    return { decisions };
   } catch {
     return { decisions: [] };
   }
 };
 
 export const actions: Actions = {
-  create: async ({ request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  create: async ({ request }) => {
 
     const formData = await request.formData();
     const title = formData.get('title') as string;
@@ -33,7 +28,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.post('/api/v1/projects/PROJECT_ID/decisions', {
         title,
         category: category || null,
@@ -42,7 +37,6 @@ export const actions: Actions = {
         notes: notes || null,
         linkedTaskId: linkedTaskId || null,
       });
-      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to create decision' });
     }

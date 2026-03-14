@@ -6,18 +6,16 @@
   import Input from '$lib/components/ui/Input.svelte';
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
-  import {
-    ArrowLeft,
-    Pencil,
-    Sun,
-    Cloud,
-    CloudRain,
-    Wind,
-    Snowflake,
-    Thermometer,
-    Camera,
-    AlertTriangle,
-  } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Pencil from 'lucide-svelte/icons/pencil';
+  import Sun from 'lucide-svelte/icons/sun';
+  import Cloud from 'lucide-svelte/icons/cloud';
+  import CloudRain from 'lucide-svelte/icons/cloud-rain';
+  import Wind from 'lucide-svelte/icons/wind';
+  import Snowflake from 'lucide-svelte/icons/snowflake';
+  import Thermometer from 'lucide-svelte/icons/thermometer';
+  import Camera from 'lucide-svelte/icons/camera';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
 
   interface DiaryEntry {
     id: string;

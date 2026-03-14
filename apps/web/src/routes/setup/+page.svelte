@@ -3,7 +3,8 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import Card from '$lib/components/ui/Card.svelte';
-  import { Hammer, ArrowRight } from 'lucide-svelte';
+  import Hammer from 'lucide-svelte/icons/hammer';
+  import ArrowRight from 'lucide-svelte/icons/arrow-right';
 
   interface Props {
     form: {

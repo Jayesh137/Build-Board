@@ -2,16 +2,11 @@ import { createApiClient } from '$lib/api-client';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return {};
-  return {};
+export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  default: async ({ request }) => {
 
     const formData = await request.formData();
     const title = formData.get('title') as string;
@@ -24,7 +19,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       const result = await api.post<{ id: string }>('/api/v1/projects/PROJECT_ID/snags', {
         title,
         room: room || null,
@@ -37,4 +32,3 @@ export const actions: Actions = {
       return fail(500, { error: 'Failed to create snag' });
     }
   },
-};

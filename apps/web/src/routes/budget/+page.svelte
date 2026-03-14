@@ -1,7 +1,10 @@
 <script lang="ts">
   import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
-  import { Wallet, TrendingUp, Shield, Receipt } from 'lucide-svelte';
+  import Wallet from 'lucide-svelte/icons/wallet';
+  import TrendingUp from 'lucide-svelte/icons/trending-up';
+  import Shield from 'lucide-svelte/icons/shield';
+  import Receipt from 'lucide-svelte/icons/receipt';
 
   interface BudgetSummary {
     totalBudget: number;

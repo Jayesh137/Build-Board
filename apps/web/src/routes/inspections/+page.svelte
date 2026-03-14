@@ -2,7 +2,9 @@
   import Card from '$lib/components/ui/Card.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { ClipboardCheck, ChevronRight, Info } from 'lucide-svelte';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import Info from 'lucide-svelte/icons/info';
 
   interface Inspection {
     id: string;

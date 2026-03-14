@@ -5,7 +5,9 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { ArrowLeft, Plus, Filter } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Filter from 'lucide-svelte/icons/filter';
 
   interface BudgetEntry {
     id: string;

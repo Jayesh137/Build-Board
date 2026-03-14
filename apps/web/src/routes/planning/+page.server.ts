@@ -1,18 +1,15 @@
 import { createApiClient } from '$lib/api-client';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { planningStatus: null, conditions: [], cilSteps: [] };
+export const load: PageServerLoad = async () => {
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const [planningStatus, conditions, cilSteps] = await Promise.all([
       api.get('/api/v1/projects/PROJECT_ID/planning/status').catch(() => null),
       api.get('/api/v1/projects/PROJECT_ID/planning/conditions').catch(() => []),
       api.get('/api/v1/projects/PROJECT_ID/cil/steps').catch(() => []),
     ]);
-    return { planningStatus, conditions, cilSteps };
   } catch {
     return { planningStatus: null, conditions: [], cilSteps: [] };
   }

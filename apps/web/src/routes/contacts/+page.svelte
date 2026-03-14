@@ -7,7 +7,13 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import { Plus, Pin, Phone, Mail, Star, AlertTriangle, ChevronRight } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import Pin from 'lucide-svelte/icons/pin';
+  import Phone from 'lucide-svelte/icons/phone';
+  import Mail from 'lucide-svelte/icons/mail';
+  import Star from 'lucide-svelte/icons/star';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
 
   interface Contact {
     id: string;

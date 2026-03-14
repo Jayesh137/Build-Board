@@ -3,16 +3,13 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { entry: null, photos: [] };
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const [entry, photos] = await Promise.all([
       api.get(`/api/v1/projects/PROJECT_ID/diary/${params.date}`).catch(() => null),
       api.get(`/api/v1/projects/PROJECT_ID/diary/${params.date}/photos`).catch(() => []),
     ]);
-    return { entry, photos, date: params.date };
   } catch {
     return { entry: null, photos: [], date: params.date };
   }
@@ -20,8 +17,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
   update: async ({ params, request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
 
     const formData = await request.formData();
     const weather = formData.get('weather') as string | null;
@@ -38,7 +33,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.patch(`/api/v1/projects/PROJECT_ID/diary/${params.date}`, {
         weather: weather || null,
         workersOnSite: workers,
@@ -46,7 +41,6 @@ export const actions: Actions = {
         notes: notes || null,
         hasConcealedWorks,
       });
-      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update diary entry' });
     }

@@ -2,23 +2,18 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { contact: null };
+export const load: PageServerLoad = async ({ params }) => {
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const contact = await api.get(`/api/v1/projects/PROJECT_ID/contacts/${params.id}`);
-    return { contact };
   } catch {
     return { contact: null };
   }
 };
 
 export const actions: Actions = {
-  update: async ({ request, locals, params }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  update: async ({ request, params }) => {
 
     const formData = await request.formData();
     const name = formData.get('name') as string;
@@ -40,7 +35,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.patch(`/api/v1/projects/PROJECT_ID/contacts/${params.id}`, {
         name,
         role: role || null,
@@ -56,7 +51,6 @@ export const actions: Actions = {
         rating: rating ? parseInt(rating, 10) : null,
         isPinned,
       });
-      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update contact' });
     }

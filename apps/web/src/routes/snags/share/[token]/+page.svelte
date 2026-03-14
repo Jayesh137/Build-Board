@@ -1,12 +1,10 @@
 <script lang="ts">
   import Card from '$lib/components/ui/Card.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import {
-    AlertTriangle,
-    Camera,
-    ChevronDown,
-    ChevronRight,
-  } from 'lucide-svelte';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import Camera from 'lucide-svelte/icons/camera';
+  import ChevronDown from 'lucide-svelte/icons/chevron-down';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
 
   interface SharedSnag {
     id: string;

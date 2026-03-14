@@ -2,7 +2,11 @@
   import Card from '$lib/components/ui/Card.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { FileCheck, AlertTriangle, Lock, Check, Circle } from 'lucide-svelte';
+  import FileCheck from 'lucide-svelte/icons/file-check';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import Lock from 'lucide-svelte/icons/lock';
+  import Check from 'lucide-svelte/icons/check';
+  import Circle from 'lucide-svelte/icons/circle';
 
   interface PlanningStatus {
     reference: string;

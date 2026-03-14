@@ -7,18 +7,16 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
   import FileUpload from '$lib/components/FileUpload.svelte';
-  import {
-    FolderOpen,
-    Upload,
-    FileText,
-    FileImage,
-    FileSpreadsheet,
-    File as FileIcon,
-    Check,
-    ChevronDown,
-    ChevronRight,
-    AlertCircle,
-  } from 'lucide-svelte';
+  import FolderOpen from 'lucide-svelte/icons/folder-open';
+  import Upload from 'lucide-svelte/icons/upload';
+  import FileText from 'lucide-svelte/icons/file-text';
+  import FileImage from 'lucide-svelte/icons/file-image';
+  import FileSpreadsheet from 'lucide-svelte/icons/file-spreadsheet';
+  import FileIcon from 'lucide-svelte/icons/file';
+  import Check from 'lucide-svelte/icons/check';
+  import ChevronDown from 'lucide-svelte/icons/chevron-down';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import AlertCircle from 'lucide-svelte/icons/circle-alert';
 
   interface Document {
     id: string;

@@ -7,7 +7,10 @@
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
-  import { ArrowLeft, ClipboardCheck, CalendarDays, User } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import CalendarDays from 'lucide-svelte/icons/calendar-days';
+  import User from 'lucide-svelte/icons/user';
 
   interface Inspection {
     id: string;

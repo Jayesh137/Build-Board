@@ -2,21 +2,19 @@
   import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import {
-    Plus,
-    BookOpen,
-    Flame,
-    Clock,
-    ChevronLeft,
-    ChevronRight,
-    Sun,
-    Cloud,
-    CloudRain,
-    Wind,
-    Snowflake,
-    Thermometer,
-    AlertTriangle,
-  } from 'lucide-svelte';
+  import Plus from 'lucide-svelte/icons/plus';
+  import BookOpen from 'lucide-svelte/icons/book-open';
+  import Flame from 'lucide-svelte/icons/flame';
+  import Clock from 'lucide-svelte/icons/clock';
+  import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import Sun from 'lucide-svelte/icons/sun';
+  import Cloud from 'lucide-svelte/icons/cloud';
+  import CloudRain from 'lucide-svelte/icons/cloud-rain';
+  import Wind from 'lucide-svelte/icons/wind';
+  import Snowflake from 'lucide-svelte/icons/snowflake';
+  import Thermometer from 'lucide-svelte/icons/thermometer';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
 
   interface DiaryEntry {
     id: string;

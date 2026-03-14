@@ -7,17 +7,15 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import {
-    ArrowLeft,
-    Clock,
-    CalendarDays,
-    Check,
-    Plus,
-    ExternalLink,
-    ThumbsUp,
-    ThumbsDown,
-    LinkIcon,
-  } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Clock from 'lucide-svelte/icons/clock';
+  import CalendarDays from 'lucide-svelte/icons/calendar-days';
+  import Check from 'lucide-svelte/icons/check';
+  import Plus from 'lucide-svelte/icons/plus';
+  import ExternalLink from 'lucide-svelte/icons/external-link';
+  import ThumbsUp from 'lucide-svelte/icons/thumbs-up';
+  import ThumbsDown from 'lucide-svelte/icons/thumbs-down';
+  import LinkIcon from 'lucide-svelte/icons/link';
 
   interface DecisionOption {
     id: string;

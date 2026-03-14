@@ -8,16 +8,14 @@
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
   import FileUpload from '$lib/components/FileUpload.svelte';
-  import {
-    ArrowLeft,
-    Pencil,
-    Check,
-    CheckCheck,
-    Camera,
-    Circle,
-    Wrench,
-    AlertTriangle,
-  } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Pencil from 'lucide-svelte/icons/pencil';
+  import Check from 'lucide-svelte/icons/check';
+  import CheckCheck from 'lucide-svelte/icons/check-check';
+  import Camera from 'lucide-svelte/icons/camera';
+  import Circle from 'lucide-svelte/icons/circle';
+  import Wrench from 'lucide-svelte/icons/wrench';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
 
   interface Snag {
     id: string;

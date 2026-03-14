@@ -2,23 +2,18 @@ import { createApiClient } from '$lib/api-client';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const { session } = await locals.safeGetSession();
-  if (!session) return { categories: [] };
+export const load: PageServerLoad = async () => {
 
   try {
-    const api = createApiClient(session.access_token);
+    const api = createApiClient();
     const categories = await api.get('/api/v1/projects/PROJECT_ID/budget/categories');
-    return { categories };
   } catch {
     return { categories: [] };
   }
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    const { session } = await locals.safeGetSession();
-    if (!session) return fail(401, { error: 'Not authenticated' });
+  default: async ({ request }) => {
 
     const formData = await request.formData();
     const categoryId = formData.get('categoryId') as string;
@@ -42,7 +37,7 @@ export const actions: Actions = {
     }
 
     try {
-      const api = createApiClient(session.access_token);
+      const api = createApiClient();
       await api.post('/api/v1/projects/PROJECT_ID/budget/entries', {
         categoryId,
         type,
@@ -60,4 +55,3 @@ export const actions: Actions = {
 
     throw redirect(303, '/budget/entries');
   },
-};

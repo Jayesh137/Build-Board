@@ -6,7 +6,12 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import { ArrowLeft, Phone, Mail, Globe, MapPin, Pin } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Phone from 'lucide-svelte/icons/phone';
+  import Mail from 'lucide-svelte/icons/mail';
+  import Globe from 'lucide-svelte/icons/globe';
+  import MapPin from 'lucide-svelte/icons/map-pin';
+  import Pin from 'lucide-svelte/icons/pin';
 
   interface Contact {
     id: string;

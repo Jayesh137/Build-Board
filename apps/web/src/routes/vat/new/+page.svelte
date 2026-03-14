@@ -6,7 +6,9 @@
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import { ArrowLeft, Upload, CheckCircle } from 'lucide-svelte';
+  import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+  import Upload from 'lucide-svelte/icons/upload';
+  import CheckCircle from 'lucide-svelte/icons/circle-check';
 
   let { form } = $props();
 
