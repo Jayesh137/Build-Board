@@ -1,4 +1,4 @@
-import { createApiClient } from '$lib/api-client';
+import { getProject, getPhases, getBudgetCategories, getDecisions, getPlanningData, getInspections, getSnags, getVATData } from '$lib/server/queries';
 import { computeNextActions, getPhaseGuidance } from '@buildtracker/shared';
 import type { PageServerLoad } from './$types';
 
@@ -20,31 +20,26 @@ export const load: PageServerLoad = async () => {
   };
 
   try {
-    const api = createApiClient();
-
     const [
       project,
       phasesData,
-      budgetData,
-      decisionsData,
-      snagData,
+      budgetCategories,
+      allDecisions,
+      snagList,
       planningData,
       vatData,
-      alertsData,
-      inspectionsData,
+      inspectionList,
     ] = await Promise.all([
-      api.get<any>('').catch(() => null),
-      api.get<any>('/phases').catch(() => []),
-      api.get<any>('/budget').catch(() => null),
-      api.get<any>('/decisions').catch(() => ({ decisions: [] })),
-      api.get<any>('/snags').catch(() => ({ snags: [] })),
-      api.get<any>('/planning').catch(() => ({ conditions: [], cilSteps: [] })),
-      api.get<any>('/vat').catch(() => null),
-      api.get<any>('/alerts').catch(() => ({ alerts: [] })),
-      api.get<any>('/inspections').catch(() => ({ inspections: [] })),
+      getProject(),
+      getPhases(),
+      getBudgetCategories(),
+      getDecisions(),
+      getSnags(),
+      getPlanningData(),
+      getVATData(),
+      getInspections(),
     ]);
 
-    // GET /phases returns array directly
     const phases = Array.isArray(phasesData) ? phasesData : [];
     let totalTasks = 0;
     let doneTasks = 0;
@@ -86,42 +81,37 @@ export const load: PageServerLoad = async () => {
 
     const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-    // GET /budget returns { categories: [...] }
-    const budgetCategories = budgetData?.categories ?? [];
+    // Budget summary from categories and project totalBudget
     const totalSpent = budgetCategories.reduce((sum: number, c: any) => sum + (c.spent ?? 0), 0);
     const totalCommitted = budgetCategories.reduce((sum: number, c: any) => sum + (c.committed ?? 0), 0);
     const totalBudget = project?.totalBudget ?? 0;
 
-    const budget = budgetData ? {
+    const budget = {
       total: totalBudget,
       spent: totalSpent,
       committed: totalCommitted,
       remaining: totalBudget - totalSpent - totalCommitted,
       contingencyRemaining: project?.contingencyPct ?? 15,
       contingencyPct: project?.contingencyPct ?? 15,
-    } : null;
+    };
 
-    // GET /decisions returns { decisions: [...] }
-    const allDecisions = decisionsData?.decisions ?? [];
+    // Decisions count (pending ones)
     const decisionCount = allDecisions.filter((d: any) => d.status !== 'decided' && d.status !== 'ordered').length;
 
-    // GET /snags returns { snags: [], counts: {} }
-    const snags = snagData?.snags ?? [];
+    // Snags count (open ones)
+    const snags = snagList || [];
     const snagCount = snags.filter((s: any) => s.status === 'open' || s.status === 'assigned' || s.status === 'in_progress').length;
 
-    // GET /planning returns { conditions: [...], cilSteps: [...] }
+    // Planning conditions count
     const conditions = planningData?.conditions ?? [];
     const cilSteps = planningData?.cilSteps ?? [];
     const conditionCount = conditions.filter((c: any) => c.status !== 'discharged' && c.conditionType === 'pre_commencement').length;
 
-    // GET /vat returns { totalVAT, totalReclaimable, ... }
+    // VAT total
     const vatTotal = vatData?.totalReclaimable ?? 0;
 
-    // GET /alerts returns { alerts: [...], counts: { critical, warning, info, total } }
-    const alerts = alertsData?.alerts ?? [];
-
-    // GET /inspections returns { inspections: [...] }
-    const inspections = inspectionsData?.inspections ?? [];
+    // Inspections
+    const inspections = inspectionList || [];
 
     // Compute next actions from all data sources
     const nextActions = computeNextActions({
@@ -137,7 +127,7 @@ export const load: PageServerLoad = async () => {
 
     return {
       project: project ? { ...project, progress, currentPhase: currentPhaseName } : null,
-      alerts,
+      alerts: [],
       budget,
       recentTasks: recentTasks.slice(0, 5),
       milestones: milestones.slice(0, 3),

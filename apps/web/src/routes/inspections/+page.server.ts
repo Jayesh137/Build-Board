@@ -1,11 +1,9 @@
-import { createApiClient } from '$lib/api-client';
+import { getInspections } from '$lib/server/queries';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // GET /inspections returns a JSON array directly: [{ id, name, type, ... }]
-    const inspections = await api.get<any[]>('/inspections');
+    const inspections = await getInspections();
     return { inspections: Array.isArray(inspections) ? inspections : [] };
   } catch {
     return { inspections: [] };

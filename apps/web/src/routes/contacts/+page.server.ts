@@ -1,14 +1,12 @@
+import { getContacts } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // API returns { contacts: [...] }
-    const result = await api.get<any>('/contacts');
-    const contacts = result?.contacts ?? [];
-    return { contacts };
+    const contacts = await getContacts();
+    return { contacts: contacts ?? [] };
   } catch {
     return { contacts: [] };
   }

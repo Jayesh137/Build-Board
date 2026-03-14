@@ -1,17 +1,14 @@
-import { createApiClient } from '$lib/api-client';
+import { getBudgetCategories, getProject } from '$lib/server/queries';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    const [budgetData, project] = await Promise.all([
-      api.get<any>('/budget').catch(() => null),
-      api.get<any>('').catch(() => null),
+    const [categoriesData, project] = await Promise.all([
+      getBudgetCategories(),
+      getProject(),
     ]);
 
-    // API returns { categories: [...] } where each category has:
-    // { id, name, allocatedAmount, typicalPct, sortOrder, committed, invoiced, spent, remaining, entryCount }
-    const categories = (budgetData?.categories ?? []).map((c: any) => ({
+    const categories = (categoriesData ?? []).map((c: any) => ({
       id: c.id,
       name: c.name,
       allocatedAmount: c.allocatedAmount ?? null,
@@ -31,14 +28,14 @@ export const load: PageServerLoad = async () => {
     const totalAllocated = categories.reduce((sum: number, c: any) => sum + (c.allocatedAmount ?? 0), 0);
     const contingencyUsed = Math.max(0, (totalSpent + totalCommitted) - (totalAllocated > 0 ? totalAllocated : totalBudget - contingencyAmount));
 
-    const summary = budgetData ? {
+    const summary = {
       totalBudget,
       totalSpent,
       totalCommitted,
       totalRemaining,
       contingencyAmount,
       contingencyUsed,
-    } : null;
+    };
 
     return { summary, categories };
   } catch {

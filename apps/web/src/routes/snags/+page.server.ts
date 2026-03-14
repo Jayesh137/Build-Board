@@ -1,12 +1,21 @@
+import { getSnags } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    const result = await api.get<any>('/snags').catch(() => ({ snags: [], counts: {} }));
-    return { snags: result.snags || [], stats: result.counts || null, shareToken: null };
+    const snagList = await getSnags();
+    const snags = snagList ?? [];
+    const stats = {
+      open: snags.filter((s: any) => s.status === 'open').length,
+      assigned: snags.filter((s: any) => s.status === 'assigned').length,
+      in_progress: snags.filter((s: any) => s.status === 'in_progress').length,
+      resolved: snags.filter((s: any) => s.status === 'resolved').length,
+      verified: snags.filter((s: any) => s.status === 'verified').length,
+      total: snags.length,
+    };
+    return { snags, stats, shareToken: null };
   } catch {
     return { snags: [], stats: null, shareToken: null };
   }

@@ -1,32 +1,15 @@
+import { getPhotos } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
-  const room = url.searchParams.get('room') || '';
-  const phase = url.searchParams.get('phase') || '';
-  const trade = url.searchParams.get('trade') || '';
-  const type = url.searchParams.get('type') || '';
-
+export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    const params = new URLSearchParams();
-    if (room) params.set('room', room);
-    if (phase) params.set('phase', phase);
-    if (trade) params.set('trade', trade);
-    if (type) params.set('type', type);
-    const qs = params.toString();
-
-    const [photos, filters] = await Promise.all([
-      api.get(`/photos${qs ? `?${qs}` : ''}`).catch(() => []),
-      api.get('/photos/filters').catch(() => ({
-        rooms: [],
-        phases: [],
-        trades: [],
-        types: [],
-      })),
-    ]);
-    return { photos, filters };
+    const photos = await getPhotos();
+    return {
+      photos: photos ?? [],
+      filters: { rooms: [], phases: [], trades: [], types: [] },
+    };
   } catch {
     return { photos: [], filters: { rooms: [], phases: [], trades: [], types: [] } };
   }

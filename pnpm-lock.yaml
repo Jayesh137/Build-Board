@@ -75,6 +75,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@buildtracker/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@buildtracker/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -84,9 +87,15 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.49
         version: 2.99.1
+      drizzle-orm:
+        specifier: ^0.38
+        version: 0.38.4(postgres@3.4.8)(react@19.2.4)
       lucide-svelte:
         specifier: ^0.474
         version: 0.474.0(svelte@5.53.12)
+      postgres:
+        specifier: ^3.4
+        version: 3.4.8
     devDependencies:
       '@sveltejs/adapter-vercel':
         specifier: ^5

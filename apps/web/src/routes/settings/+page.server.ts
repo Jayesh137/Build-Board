@@ -1,11 +1,11 @@
 import { redirect, fail, isRedirect } from '@sveltejs/kit';
+import { getProject } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    const project = await api.get<any>('');
+    const project = await getProject();
     return { project, userEmail: null };
   } catch {
     return { project: null, userEmail: null };

@@ -1,15 +1,12 @@
+import { getDocuments } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // GET /documents returns { documents: [], grouped: {} }
-    const result = await api.get<any>('/documents').catch(() => ({ documents: [], grouped: {} }));
-    const documents = result?.documents ?? [];
-    // requiredDocs not available from API; pass empty array
-    return { documents, requiredDocs: [] };
+    const documents = await getDocuments();
+    return { documents: documents ?? [], requiredDocs: [] };
   } catch {
     return { documents: [], requiredDocs: [] };
   }

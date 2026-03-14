@@ -1,14 +1,12 @@
+import { getDecisions } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // API returns { decisions: [...] }
-    const result = await api.get<any>('/decisions').catch(() => ({ decisions: [] }));
-    const decisions = result?.decisions ?? [];
-    return { decisions };
+    const decisions = await getDecisions();
+    return { decisions: decisions ?? [] };
   } catch {
     return { decisions: [] };
   }

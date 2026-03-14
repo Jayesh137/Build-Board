@@ -1,16 +1,10 @@
-import { createApiClient } from '$lib/api-client';
+import { getDiaryEntries } from '$lib/server/queries';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // GET /diary returns { entries: [...] }
-    const [diaryData, streak] = await Promise.all([
-      api.get<any>('/diary').catch(() => ({ entries: [] })),
-      api.get<any>('/diary/streak').catch(() => null),
-    ]);
-    const entries = diaryData?.entries ?? [];
-    return { entries, streak };
+    const entries = await getDiaryEntries();
+    return { entries: entries ?? [], streak: null };
   } catch {
     return { entries: [], streak: null };
   }

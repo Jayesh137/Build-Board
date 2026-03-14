@@ -8,6 +8,6 @@ export default defineConfig({
     include: ['lucide-svelte'],
   },
   ssr: {
-    noExternal: ['lucide-svelte'],
+    noExternal: ['lucide-svelte', 'drizzle-orm', '@buildtracker/db', '@buildtracker/shared'],
   },
 });

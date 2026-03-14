@@ -1,3 +1,4 @@
+import { getPhases } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import { getPhaseGuidance } from '@buildtracker/shared';
@@ -5,9 +6,7 @@ import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const api = createApiClient();
-    // GET /phases returns a JSON array directly: [{ id, name, sortOrder, status, tasks: [...] }, ...]
-    const phasesData = await api.get<any>('/phases?include=tasks');
+    const phasesData = await getPhases();
     const phases = Array.isArray(phasesData) ? phasesData : [];
 
     // Determine current phase: first in_progress, or first not_started, or first overall
