@@ -335,46 +335,6 @@
 
   <!-- Focus Now removed from here - moved to Column 3 -->
 
-  <!-- Alert Banner -->
-  {#if data.alerts.length > 0}
-    <div class="animate-in-delay-1 rounded-xl border border-amber-200/60 bg-amber-50/50 shadow-sm dark:border-amber-900/30 dark:bg-amber-950/20">
-      <button
-        class="flex w-full items-center justify-between px-5 py-3 text-left"
-        onclick={() => (alertsExpanded = !alertsExpanded)}
-      >
-        <div class="flex items-center gap-2.5">
-          <AlertTriangle size={16} class="text-amber-600 dark:text-amber-400" />
-          <span class="text-sm font-medium text-amber-800 dark:text-amber-300">
-            {data.alerts.length} {data.alerts.length === 1 ? 'item needs' : 'items need'} attention
-          </span>
-        </div>
-        {#if alertsExpanded}
-          <ChevronUp size={16} class="text-amber-600 dark:text-amber-400" />
-        {:else}
-          <ChevronDown size={16} class="text-amber-600 dark:text-amber-400" />
-        {/if}
-      </button>
-
-      {#if alertsExpanded}
-        <div class="space-y-2 px-5 pb-4">
-          {#each data.alerts as alert}
-            <a
-              href={alert.link}
-              class="block rounded-lg border-l-[3px] bg-white/70 p-3 transition-colors duration-200 hover:bg-white dark:bg-zinc-900/50 dark:hover:bg-zinc-900 {alertBorderColor(alert.priority)}"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{alert.title}</p>
-                  <p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">{alert.description}</p>
-                </div>
-                <ArrowRight size={14} class="mt-0.5 shrink-0 text-zinc-300 dark:text-zinc-600" />
-              </div>
-            </a>
-          {/each}
-        </div>
-      {/if}
-    </div>
-  {/if}
 
   <!-- Three-Column Grid -->
   <div class="grid gap-5 lg:grid-cols-3">
