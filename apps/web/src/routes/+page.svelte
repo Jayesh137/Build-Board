@@ -19,6 +19,11 @@
   import Plus from 'lucide-svelte/icons/plus';
   import FileCheck from 'lucide-svelte/icons/file-check';
   import Landmark from 'lucide-svelte/icons/landmark';
+  import Target from 'lucide-svelte/icons/target';
+  import Compass from 'lucide-svelte/icons/compass';
+  import Lightbulb from 'lucide-svelte/icons/lightbulb';
+  import CircleAlert from 'lucide-svelte/icons/circle-alert';
+  import OctagonAlert from 'lucide-svelte/icons/octagon-alert';
 
   interface Props {
     data: {
@@ -63,15 +68,33 @@
       decisionCount: number;
       conditionCount: number;
       vatTotal: number;
+      nextActions: Array<{
+        priority: 'critical' | 'high' | 'medium' | 'low';
+        type: string;
+        title: string;
+        reason: string;
+        guidance: string;
+        link: string;
+      }>;
+      phaseGuidance: {
+        summary: string;
+        whatToFocus: string[];
+        tips: Array<{ content: string; importance: string }>;
+        commonMistakes: string[];
+        keyDecisions: Array<{ title: string; why: string; leadTime: string }>;
+      } | null;
+      currentPhase: string | null;
+      progress: number;
     };
   }
 
   let { data }: Props = $props();
 
   let alertsExpanded = $state(false);
+  let mistakesExpanded = $state(false);
 
   let progress = $derived(data.project?.progress ?? 0);
-  let currentPhase = $derived(data.project?.currentPhase ?? null);
+  let currentPhase = $derived(data.project?.currentPhase ?? data.currentPhase ?? null);
 
   let daysIntoProject = $derived.by(() => {
     if (!data.project?.startDate) return 0;
@@ -79,6 +102,23 @@
     const now = new Date();
     return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   });
+
+  // Pick a rotating tip based on the current date (changes daily)
+  let rotatingTip = $derived.by(() => {
+    if (!data.phaseGuidance?.tips?.length) return null;
+    const dayOfYear = Math.floor(
+      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const index = dayOfYear % data.phaseGuidance.tips.length;
+    return data.phaseGuidance.tips[index];
+  });
+
+  let hasCriticalActions = $derived(
+    data.nextActions.some((a) => a.priority === 'critical')
+  );
+
+  let primaryAction = $derived(data.nextActions[0] ?? null);
+  let secondaryActions = $derived(data.nextActions.slice(1, 4));
 
   const phaseSegments = [
     { name: 'A', label: 'Pre-Construction', pct: 5 },
@@ -131,6 +171,24 @@
       case 'warning': return 'border-l-amber-500';
       default: return 'border-l-blue-500';
     }
+  }
+
+  function priorityBadgeClasses(priority: string): string {
+    switch (priority) {
+      case 'critical': return 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400';
+      case 'high': return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
+      case 'medium': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400';
+      default: return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
+    }
+  }
+
+  function leadTimeBadgeClasses(leadTime: string): string {
+    // Parse the first number to determine urgency
+    const match = leadTime.match(/(\d+)/);
+    const weeks = match ? parseInt(match[1]) : 0;
+    if (weeks >= 6) return 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400';
+    if (weeks >= 3) return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
+    return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
   }
 
   const circumference = 2 * Math.PI * 45;
@@ -275,6 +333,80 @@
     </div>
   </div>
 
+  <!-- Focus Now Card -->
+  {#if data.nextActions.length > 0}
+    <div class="animate-in-delay-1 rounded-xl border shadow-sm {hasCriticalActions ? 'border-red-200/60 bg-red-50/30 dark:border-red-900/30 dark:bg-red-950/10' : 'border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-900'}" style="border-left: 4px solid {hasCriticalActions ? 'rgb(239 68 68)' : 'rgb(99 102 241)'};">
+      <div class="p-5 lg:p-6">
+        <div class="mb-4 flex items-center gap-2.5">
+          <Target size={18} class={hasCriticalActions ? 'text-red-500' : 'text-indigo-500'} />
+          <p class="text-[11px] uppercase tracking-wider font-medium {hasCriticalActions ? 'text-red-600 dark:text-red-400' : 'text-indigo-600 dark:text-indigo-400'}">Focus Now</p>
+        </div>
+
+        {#if primaryAction}
+          <!-- Primary action -->
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  {primaryAction.title}
+                </h3>
+                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium {priorityBadgeClasses(primaryAction.priority)}">
+                  {primaryAction.priority}
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                {primaryAction.reason}
+              </p>
+              <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                {primaryAction.guidance}
+              </p>
+            </div>
+            <a
+              href={primaryAction.link}
+              class="mt-1 shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600"
+            >
+              View Details
+              <ArrowRight size={14} />
+            </a>
+          </div>
+
+          <!-- Secondary actions -->
+          {#if secondaryActions.length > 0}
+            <div class="mt-5 border-t border-zinc-200/50 pt-4 dark:border-zinc-700/50">
+              <p class="mb-2.5 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Also needs attention</p>
+              <div class="space-y-2">
+                {#each secondaryActions as action}
+                  <a
+                    href={action.link}
+                    class="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                  >
+                    <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold {priorityBadgeClasses(action.priority)}">
+                      {action.priority}
+                    </span>
+                    <span class="min-w-0 flex-1 truncate text-sm text-zinc-700 dark:text-zinc-300">{action.title}</span>
+                    <span class="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">{action.reason}</span>
+                    <ArrowRight size={14} class="shrink-0 text-zinc-300 dark:text-zinc-600" />
+                  </a>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        {/if}
+      </div>
+    </div>
+  {:else}
+    <!-- All clear state -->
+    <div class="animate-in-delay-1 rounded-xl border border-green-200/60 bg-green-50/30 p-5 shadow-sm dark:border-green-900/30 dark:bg-green-950/10 lg:p-6" style="border-left: 4px solid rgb(34 197 94);">
+      <div class="flex items-center gap-3">
+        <CircleCheck size={20} class="text-green-500" />
+        <div>
+          <p class="text-sm font-semibold text-green-800 dark:text-green-300">All clear — nothing needs your attention right now</p>
+          <p class="mt-0.5 text-xs text-green-600 dark:text-green-400">Keep up the great work. Check back later for new actions.</p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
   <!-- Alert Banner -->
   {#if data.alerts.length > 0}
     <div class="animate-in-delay-1 rounded-xl border border-amber-200/60 bg-amber-50/50 shadow-sm dark:border-amber-900/30 dark:bg-amber-950/20">
@@ -318,8 +450,101 @@
 
   <!-- Three-Column Grid -->
   <div class="grid gap-5 lg:grid-cols-3">
-    <!-- Column 1: Schedule -->
+    <!-- Column 1: Schedule + Phase Guide -->
     <div class="space-y-5">
+      <!-- Phase Guide -->
+      {#if data.phaseGuidance}
+        <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+          <div class="mb-4 flex items-center gap-2.5">
+            <Compass size={16} class="text-accent-500" />
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Phase Guide</p>
+          </div>
+
+          {#if currentPhase}
+            <p class="mb-3 text-xs font-medium text-accent-600 dark:text-accent-400">{currentPhase}</p>
+          {/if}
+
+          <p class="mb-4 text-sm italic text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            {data.phaseGuidance.summary}
+          </p>
+
+          <!-- What to focus on -->
+          <div class="mb-4">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">What to focus on</p>
+            <ul class="space-y-1.5">
+              {#each data.phaseGuidance.whatToFocus as item}
+                <li class="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span>
+                  {item}
+                </li>
+              {/each}
+            </ul>
+          </div>
+
+          <!-- Rotating tip -->
+          {#if rotatingTip}
+            <div class="mb-4 rounded-lg bg-amber-50/70 px-3.5 py-3 dark:bg-amber-950/20">
+              <div class="flex items-start gap-2">
+                <Lightbulb size={14} class="mt-0.5 shrink-0 text-amber-500" />
+                <p class="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                  {rotatingTip.content}
+                </p>
+              </div>
+            </div>
+          {/if}
+
+          <!-- Common mistakes (collapsible) -->
+          {#if data.phaseGuidance.commonMistakes.length > 0}
+            <div class="mb-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <button
+                class="flex w-full items-center justify-between text-left"
+                onclick={() => (mistakesExpanded = !mistakesExpanded)}
+              >
+                <span class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  <OctagonAlert size={12} />
+                  Common mistakes
+                </span>
+                {#if mistakesExpanded}
+                  <ChevronUp size={14} class="text-zinc-400" />
+                {:else}
+                  <ChevronDown size={14} class="text-zinc-400" />
+                {/if}
+              </button>
+              {#if mistakesExpanded}
+                <ul class="mt-2.5 space-y-2">
+                  {#each data.phaseGuidance.commonMistakes as mistake}
+                    <li class="flex items-start gap-2 text-sm text-red-700 dark:text-red-400">
+                      <CircleAlert size={12} class="mt-1 shrink-0" />
+                      <span class="leading-relaxed">{mistake}</span>
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
+            </div>
+          {/if}
+
+          <!-- Key decisions for this phase -->
+          {#if data.phaseGuidance.keyDecisions.length > 0}
+            <div class="border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <p class="mb-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Key decisions</p>
+              <div class="space-y-2.5">
+                {#each data.phaseGuidance.keyDecisions as decision}
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{decision.title}</p>
+                      <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">{decision.why}</p>
+                    </div>
+                    <span class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium {leadTimeBadgeClasses(decision.leadTime)}">
+                      {decision.leadTime}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <!-- This Week -->
       <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
         <div class="mb-4 flex items-center justify-between">
