@@ -14,6 +14,14 @@ import { budgetRoutes } from './routes/budget.js';
 import { vatRoutes } from './routes/vat.js';
 import { planningRoutes } from './routes/planning.js';
 import { inspectionRoutes } from './routes/inspections.js';
+import { decisionRoutes } from './routes/decisions.js';
+import { documentRoutes } from './routes/documents.js';
+import { diaryRoutes } from './routes/diary.js';
+import { photoRoutes } from './routes/photos.js';
+import { snagRoutes } from './routes/snags.js';
+import { db } from './lib/db.js';
+import { snags } from '@buildtracker/db';
+import { eq } from 'drizzle-orm';
 
 const app = new Hono();
 
@@ -27,6 +35,46 @@ app.use('*', cors({
 
 // Health check (no auth)
 app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+// Public snag share endpoint (no auth required — must be before auth middleware)
+app.get('/api/v1/snags/share/:token', async (c) => {
+  if (!db) return c.json({ error: 'Database not configured' }, 503);
+
+  const token = c.req.param('token');
+
+  const matchingSnags = await db
+    .select()
+    .from(snags)
+    .where(eq(snags.shareToken, token));
+
+  if (matchingSnags.length === 0) {
+    return c.json({ error: 'Invalid or expired share link' }, 404);
+  }
+
+  // All snags with this token belong to the same project
+  const projectId = matchingSnags[0].projectId;
+
+  // Return all snags for this project that have this share token
+  // Strip sensitive fields for the public view
+  const publicSnags = matchingSnags.map((snag) => ({
+    id: snag.id,
+    title: snag.title,
+    room: snag.room,
+    category: snag.category,
+    severity: snag.severity,
+    description: snag.description,
+    photoIds: snag.photoIds,
+    dateFound: snag.dateFound,
+    deadline: snag.deadline,
+    status: snag.status,
+    resolutionPhotoIds: snag.resolutionPhotoIds,
+    resolutionDate: snag.resolutionDate,
+    resolutionNotes: snag.resolutionNotes,
+    createdAt: snag.createdAt,
+  }));
+
+  return c.json({ projectId, snags: publicSnags });
+});
 
 // Auth routes (require auth but not project access)
 app.use('/auth/*', auth);
@@ -44,6 +92,11 @@ projectScoped.route('/budget', budgetRoutes);
 projectScoped.route('/vat', vatRoutes);
 projectScoped.route('/planning', planningRoutes);
 projectScoped.route('/inspections', inspectionRoutes);
+projectScoped.route('/decisions', decisionRoutes);
+projectScoped.route('/documents', documentRoutes);
+projectScoped.route('/diary', diaryRoutes);
+projectScoped.route('/photos', photoRoutes);
+projectScoped.route('/snags', snagRoutes);
 
 // Mount project-scoped routes
 app.route('/api/v1/projects/:projectId', projectScoped);
