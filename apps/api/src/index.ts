@@ -7,6 +7,13 @@ import { auth } from './middleware/auth.js';
 import { projectAccess } from './middleware/project-access.js';
 import { authRoutes } from './routes/auth.js';
 import { projectRoutes } from './routes/projects.js';
+import { phaseRoutes } from './routes/phases.js';
+import { taskRoutes } from './routes/tasks.js';
+import { contactRoutes } from './routes/contacts.js';
+import { budgetRoutes } from './routes/budget.js';
+import { vatRoutes } from './routes/vat.js';
+import { planningRoutes } from './routes/planning.js';
+import { inspectionRoutes } from './routes/inspections.js';
 
 const app = new Hono();
 
@@ -30,6 +37,13 @@ const projectScoped = new Hono();
 projectScoped.use('*', auth);
 projectScoped.use('*', projectAccess);
 projectScoped.route('/', projectRoutes);
+projectScoped.route('/phases', phaseRoutes);
+projectScoped.route('/tasks', taskRoutes);
+projectScoped.route('/contacts', contactRoutes);
+projectScoped.route('/budget', budgetRoutes);
+projectScoped.route('/vat', vatRoutes);
+projectScoped.route('/planning', planningRoutes);
+projectScoped.route('/inspections', inspectionRoutes);
 
 // Mount project-scoped routes
 app.route('/api/v1/projects/:projectId', projectScoped);
