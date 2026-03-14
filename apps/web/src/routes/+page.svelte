@@ -62,8 +62,8 @@
   let { data }: Props = $props();
 
   // Computed values
-  let progress = $derived(data.project ? 12 : 0);
-  let currentPhase = $derived(data.project ? 'Phase A: Pre-Construction' : null);
+  let progress = $derived(data.project?.progress ?? 0);
+  let currentPhase = $derived(data.project?.currentPhase ?? null);
   let daysIntoProject = $derived(() => {
     if (!data.project?.startDate) return 0;
     const start = new Date(data.project.startDate);
