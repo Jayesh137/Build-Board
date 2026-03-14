@@ -1,12 +1,11 @@
 import { createServerClient } from '@supabase/ssr';
-import { type Handle, redirect } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
+import type { Handle } from '@sveltejs/kit';
 import {
   PUBLIC_SUPABASE_URL,
   PUBLIC_SUPABASE_ANON_KEY
 } from '$env/static/public';
 
-const supabaseHandle: Handle = async ({ event, resolve }) => {
+export const handle: Handle = async ({ event, resolve }) => {
   event.locals.supabase = createServerClient(
     PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_ANON_KEY,
@@ -23,51 +22,10 @@ const supabaseHandle: Handle = async ({ event, resolve }) => {
   );
 
   event.locals.safeGetSession = async () => {
-    const {
-      data: { session }
-    } = await event.locals.supabase.auth.getSession();
-
-    if (!session) {
-      return { session: null, user: null };
-    }
-
-    const {
-      data: { user },
-      error
-    } = await event.locals.supabase.auth.getUser();
-
-    if (error) {
-      return { session: null, user: null };
-    }
-
-    return { session, user };
+    return { session: null, user: null };
   };
-
-  return resolve(event, {
-    filterSerializedResponseHeaders(name) {
-      return name === 'content-range' || name === 'x-supabase-api-version';
-    }
-  });
-};
-
-const authGuard: Handle = async ({ event, resolve }) => {
-  const { session, user } = await event.locals.safeGetSession();
-  event.locals.session = session;
-  event.locals.user = user;
-
-  const isAuthRoute = event.url.pathname.startsWith('/auth');
-  const isPublicRoute =
-    isAuthRoute || event.url.pathname.startsWith('/snags/share');
-
-  if (!session && !isPublicRoute) {
-    throw redirect(303, '/auth/login');
-  }
-
-  if (session && isAuthRoute && !event.url.pathname.startsWith('/auth/callback')) {
-    throw redirect(303, '/');
-  }
+  event.locals.session = null;
+  event.locals.user = null;
 
   return resolve(event);
 };
-
-export const handle = sequence(supabaseHandle, authGuard);

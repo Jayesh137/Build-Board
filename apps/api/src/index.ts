@@ -80,19 +80,23 @@ app.get('/api/v1/snags/share/:token', async (c) => {
   return c.json({ projectId, snags: publicSnags });
 });
 
-// Auth routes (require auth but not project access)
-app.use('/auth/*', auth);
+// Auth routes
 app.route('/auth', authRoutes);
 
-// Setup routes (require auth but NOT project access — user doesn't have a project yet)
-app.use('/api/v1/setup/*', auth);
-app.use('/api/v1/setup', auth);
+// Setup routes
 app.route('/api/v1/setup', setupRoutes);
 
-// Project-scoped routes (require auth + project membership)
+// Project-scoped routes (no auth required for personal use)
 const projectScoped = new Hono();
-projectScoped.use('*', auth);
-projectScoped.use('*', projectAccess);
+// Set default project context for all project-scoped routes
+projectScoped.use('*', async (c, next) => {
+  const projectId = c.req.param('projectId');
+  c.set('projectId', projectId);
+  c.set('userId', 'owner');
+  c.set('memberRole', 'owner');
+  c.set('memberModules', null);
+  await next();
+});
 projectScoped.route('/', projectRoutes);
 projectScoped.route('/phases', phaseRoutes);
 projectScoped.route('/tasks', taskRoutes);

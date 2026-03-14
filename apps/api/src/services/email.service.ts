@@ -1,7 +1,8 @@
 import { Resend } from 'resend';
 import type { Alert } from './alerts.service.js';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiKey = process.env.RESEND_API_KEY;
+const resend = apiKey ? new Resend(apiKey) : null;
 const FROM_EMAIL = process.env.EMAIL_FROM || 'BuildTracker <alerts@buildtracker.app>';
 
 function escapeHtml(str: string): string {
@@ -122,6 +123,11 @@ export async function sendAlertDigest(
       ? `[Action Required] ${critical} critical alert${critical === 1 ? '' : 's'} — ${projectName}`
       : `Daily Digest — ${projectName}`;
 
+    if (!resend) {
+      console.log('Email skipped (no RESEND_API_KEY):', subject);
+      return { success: true };
+    }
+
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to,
@@ -177,6 +183,11 @@ export async function sendDeadlineReminder(
   </div>
 </body>
 </html>`;
+
+    if (!resend) {
+      console.log('Email skipped (no RESEND_API_KEY):', alert.title);
+      return { success: true };
+    }
 
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
