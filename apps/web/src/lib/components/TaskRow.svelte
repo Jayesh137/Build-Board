@@ -1,6 +1,5 @@
 <script lang="ts">
   import ChevronRight from 'lucide-svelte/icons/chevron-right';
-  import Diamond from 'lucide-svelte/icons/diamond';
 
   interface Props {
     href: string;
@@ -47,13 +46,6 @@
   <span class="flex-1 truncate text-sm text-zinc-900 dark:text-zinc-100">
     {title}
   </span>
-
-  <!-- Milestone diamond -->
-  {#if isMilestone}
-    <span class="flex-shrink-0 text-amber-500">
-      <Diamond size={14} />
-    </span>
-  {/if}
 
   <!-- Due date -->
   {#if dueDate}

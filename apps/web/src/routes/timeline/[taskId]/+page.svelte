@@ -81,9 +81,6 @@
     <Card>
       <div class="mb-6 flex items-start justify-between gap-4">
         <div class="flex items-center gap-3">
-          {#if task.isMilestone}
-            <Diamond size={20} class="flex-shrink-0 text-amber-500" />
-          {/if}
           <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{task.title}</h1>
         </div>
         <StatusBadge status={task.status} size="md" />

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Diamond from 'lucide-svelte/icons/diamond';
+  import CircleDot from 'lucide-svelte/icons/circle-dot';
   import CalendarDays from 'lucide-svelte/icons/calendar-days';
   import Wallet from 'lucide-svelte/icons/wallet';
   import Receipt from 'lucide-svelte/icons/receipt';
@@ -138,14 +138,14 @@
     <!-- Next Milestones -->
     <a href="/timeline" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
-        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Next Milestones</p>
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Up Next</p>
         <span class="text-xs text-indigo-500 dark:text-indigo-400">View all</span>
       </div>
       {#if data.milestones.length > 0}
         <div class="space-y-3">
           {#each data.milestones.slice(0, 3) as milestone}
             <div class="flex items-start gap-3">
-              <Diamond size={14} class="mt-0.5 shrink-0 text-accent-400" />
+              <CircleDot size={14} class="mt-0.5 shrink-0 text-indigo-400" />
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">{milestone.title}</p>
                 {#if milestone.dueDate}
@@ -158,7 +158,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <Diamond size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
+          <CircleDot size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">No milestones set</p>
           <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Key milestones will appear here</p>
         </div>

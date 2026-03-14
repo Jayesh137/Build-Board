@@ -44,7 +44,7 @@ export const load: PageServerLoad = async () => {
     let totalTasks = 0;
     let doneTasks = 0;
     const allTasks: any[] = [];
-    const milestones: any[] = [];
+    const upNext: any[] = [];
     const recentTasks: any[] = [];
 
     // Determine current phase: first in_progress, or first not_started
@@ -74,7 +74,8 @@ export const load: PageServerLoad = async () => {
       for (const t of tasks) {
         allTasks.push(t);
         if (t.status === 'done') doneTasks++;
-        if (t.isMilestone && t.status !== 'done') milestones.push(t);
+        // Collect next incomplete tasks from the current phase
+        if (currentPhaseObj && phase.id === currentPhaseObj.id && t.status !== 'done') upNext.push(t);
         if (t.status === 'in_progress' || (t.dueDate && t.status !== 'done')) recentTasks.push(t);
       }
     }
@@ -130,7 +131,7 @@ export const load: PageServerLoad = async () => {
       alerts: [],
       budget,
       recentTasks: recentTasks.slice(0, 5),
-      milestones: milestones.slice(0, 3),
+      milestones: upNext.slice(0, 4),
       snagCount,
       decisionCount,
       conditionCount,
