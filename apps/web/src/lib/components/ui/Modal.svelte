@@ -28,26 +28,39 @@
 {#if open}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    style="animation: fadeIn 150ms ease-out"
     role="dialog"
     aria-modal="true"
     aria-label={title}
     onkeydown={handleKeydown}
     onclick={handleBackdropClick}
   >
-    <div class="w-full max-w-lg rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+    <div
+      class="w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+      style="animation: slideIn 200ms ease-out"
+    >
       {#if title}
         <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-700">
           <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
           <button
             onclick={handleClose}
-            class="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="Close"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
+      {:else}
+        <button
+          onclick={handleClose}
+          class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+          aria-label="Close"
+        >
+          <X size={18} />
+        </button>
       {/if}
-      <div class="p-6">
+      <div class="overflow-y-auto p-6">
         {@render children()}
       </div>
     </div>

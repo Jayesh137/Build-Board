@@ -18,7 +18,7 @@
 </script>
 
 <div
-  class="rounded-md border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 {paddings[padding]} {interactive ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors' : ''} {className}"
+  class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-none {paddings[padding]} {interactive ? 'cursor-pointer hover:shadow-md hover:translate-y-[-1px] dark:hover:bg-zinc-800/80 transition-all duration-200 ease-out' : ''} {className}"
   {...rest}
 >
   {@render children()}

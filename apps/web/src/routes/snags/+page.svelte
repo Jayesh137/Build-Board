@@ -1,6 +1,5 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
   import Input from '$lib/components/ui/Input.svelte';
@@ -15,6 +14,10 @@
   import Copy from 'lucide-svelte/icons/copy';
   import Check from 'lucide-svelte/icons/check';
   import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import CircleAlert from 'lucide-svelte/icons/circle-alert';
+  import Clock from 'lucide-svelte/icons/clock';
+  import CircleCheck from 'lucide-svelte/icons/circle-check';
+  import ShieldCheck from 'lucide-svelte/icons/shield-check';
 
   interface Snag {
     id: string;
@@ -46,7 +49,6 @@
   let filterRoom = $state('all');
   let filterSeverity = $state('all');
   let filterStatus = $state('all');
-  let filterContractor = $state('all');
   let copied = $state(false);
 
   const severityOptions = [
@@ -68,11 +70,6 @@
   const rooms = $derived(() => {
     const set = new Set(snags.map((s) => s.room).filter(Boolean) as string[]);
     return [{ value: 'all', label: 'All rooms' }, ...Array.from(set).sort().map((r) => ({ value: r, label: r }))];
-  });
-
-  const contractors = $derived(() => {
-    const set = new Set(snags.map((s) => s.contractor).filter(Boolean) as string[]);
-    return [{ value: 'all', label: 'All contractors' }, ...Array.from(set).sort().map((c) => ({ value: c, label: c }))];
   });
 
   const roomSelectOptions = [
@@ -98,10 +95,8 @@
       .filter((s) => filterRoom === 'all' || s.room === filterRoom)
       .filter((s) => filterSeverity === 'all' || s.severity === filterSeverity)
       .filter((s) => filterStatus === 'all' || s.status === filterStatus)
-      .filter((s) => filterContractor === 'all' || s.contractor === filterContractor)
   );
 
-  // Kanban columns
   const kanbanColumns = [
     { key: 'open', label: 'Open', variant: 'not_started' as const },
     { key: 'assigned', label: 'Assigned', variant: 'info' as const },
@@ -144,6 +139,14 @@
     }
   }
 
+  function severityBorder(severity: string): string {
+    switch (severity) {
+      case 'critical': return 'border-l-red-500';
+      case 'major': return 'border-l-amber-500';
+      default: return 'border-l-zinc-300 dark:border-l-zinc-600';
+    }
+  }
+
   function formatDate(dateStr: string): string {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -162,12 +165,16 @@
 
 <div class="space-y-6">
   <!-- Header -->
-  <div class="flex items-start justify-between gap-4">
+  <div class="flex items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Snag List</h1>
-      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Track and resolve defects
-      </p>
+      <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+        Snag List
+        {#if stats}
+          <span class="ml-2 align-middle text-base font-normal text-zinc-400 dark:text-zinc-500">
+            {stats.total} total
+          </span>
+        {/if}
+      </h1>
     </div>
     <div class="flex items-center gap-2">
       {#if shareToken}
@@ -183,87 +190,122 @@
       {/if}
       <Button onclick={() => (showAddModal = true)} size="sm">
         <Plus size={16} />
-        Add Snag
+        Report Snag
       </Button>
     </div>
   </div>
 
   <!-- Stats bar -->
   {#if stats}
-    <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
-      <Card padding="compact">
-        <div class="px-2 py-1.5 text-center">
-          <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{stats.total}</p>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Total</p>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+        <div class="flex items-center gap-3 px-4 py-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/40">
+            <CircleAlert size={18} class="text-red-500 dark:text-red-400" />
+          </div>
+          <div>
+            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.open}</p>
+            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Open</p>
+          </div>
         </div>
-      </Card>
-      <Card padding="compact">
-        <div class="px-2 py-1.5 text-center">
-          <p class="text-lg font-semibold text-red-600 dark:text-red-400">{stats.open}</p>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Open</p>
+      </div>
+
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+        <div class="flex items-center gap-3 px-4 py-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/40">
+            <Clock size={18} class="text-amber-500 dark:text-amber-400" />
+          </div>
+          <div>
+            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.inProgress}</p>
+            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">In Progress</p>
+          </div>
         </div>
-      </Card>
-      <Card padding="compact">
-        <div class="px-2 py-1.5 text-center">
-          <p class="text-lg font-semibold text-amber-600 dark:text-amber-400">{stats.inProgress}</p>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">In Progress</p>
+      </div>
+
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+        <div class="flex items-center gap-3 px-4 py-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/40">
+            <CircleCheck size={18} class="text-green-500 dark:text-green-400" />
+          </div>
+          <div>
+            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.fixed}</p>
+            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Fixed</p>
+          </div>
         </div>
-      </Card>
-      <Card padding="compact">
-        <div class="px-2 py-1.5 text-center">
-          <p class="text-lg font-semibold text-blue-600 dark:text-blue-400">{stats.fixed}</p>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Fixed</p>
+      </div>
+
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+        <div class="flex items-center gap-3 px-4 py-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40">
+            <ShieldCheck size={18} class="text-blue-500 dark:text-blue-400" />
+          </div>
+          <div>
+            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.verified}</p>
+            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Verified</p>
+          </div>
         </div>
-      </Card>
-      <Card padding="compact">
-        <div class="px-2 py-1.5 text-center">
-          <p class="text-lg font-semibold text-green-600 dark:text-green-400">{stats.verified}</p>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Verified</p>
-        </div>
-      </Card>
+      </div>
     </div>
   {/if}
 
-  <!-- View toggle and filters -->
-  <div class="flex flex-wrap items-end gap-3">
-    <div class="flex rounded-md border border-zinc-200 dark:border-zinc-700">
+  <!-- View toggle & filters -->
+  <div class="flex flex-wrap items-center gap-3">
+    <!-- View toggle pills -->
+    <div class="flex rounded-full bg-zinc-100 p-0.5 dark:bg-zinc-800">
       <button
         onclick={() => (viewMode = 'list')}
-        class="flex items-center gap-1.5 rounded-l-md px-3 py-1.5 text-xs font-medium transition-colors {viewMode === 'list'
-          ? 'bg-accent-50 text-accent-700 dark:bg-accent-950 dark:text-accent-400'
-          : 'text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800'}"
+        class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all {viewMode === 'list'
+          ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
+          : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}"
       >
         <List size={14} />
         List
       </button>
       <button
         onclick={() => (viewMode = 'kanban')}
-        class="flex items-center gap-1.5 rounded-r-md border-l border-zinc-200 px-3 py-1.5 text-xs font-medium transition-colors dark:border-zinc-700 {viewMode === 'kanban'
-          ? 'bg-accent-50 text-accent-700 dark:bg-accent-950 dark:text-accent-400'
-          : 'text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800'}"
+        class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all {viewMode === 'kanban'
+          ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
+          : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}"
       >
         <Columns3 size={14} />
         Board
       </button>
     </div>
 
-    <div class="w-32">
-      <Select options={rooms()} bind:value={filterRoom} />
-    </div>
-    <div class="w-32">
-      <Select options={severityOptions} bind:value={filterSeverity} />
-    </div>
-    <div class="w-32">
-      <Select options={statusOptions} bind:value={filterStatus} />
-    </div>
-    <div class="w-36">
-      <Select options={contractors()} bind:value={filterContractor} />
+    <div class="h-5 w-px bg-zinc-200 dark:bg-zinc-700"></div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap items-center gap-2">
+      <select
+        bind:value={filterRoom}
+        class="h-8 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-700 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+      >
+        {#each rooms() as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
+      <select
+        bind:value={filterSeverity}
+        class="h-8 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-700 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+      >
+        {#each severityOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
+      <select
+        bind:value={filterStatus}
+        class="h-8 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-700 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+      >
+        {#each statusOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 
   <!-- Share link info -->
   {#if shareToken}
-    <div class="flex items-center gap-2 rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+    <div class="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400">
       <Share2 size={12} />
       <span>Contractors can view assigned snags via the shared link</span>
     </div>
@@ -271,48 +313,59 @@
 
   <!-- Content -->
   {#if filteredSnags.length === 0 && snags.length === 0}
-    <Card>
-      <div class="flex flex-col items-center justify-center py-12 text-center">
-        <AlertTriangle size={32} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">No snags recorded yet</p>
-        <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Track defects and issues found during your build</p>
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30">
+          <CircleCheck size={28} class="text-green-400 dark:text-green-500" />
+        </div>
+        <p class="text-base font-medium text-zinc-700 dark:text-zinc-300">No snags yet — that's a good thing!</p>
+        <p class="mt-1 text-sm text-zinc-400 dark:text-zinc-500">Report defects and issues found during your build</p>
+        <div class="mt-5">
+          <Button size="sm" onclick={() => (showAddModal = true)}>
+            <Plus size={16} />
+            Report Snag
+          </Button>
+        </div>
       </div>
-    </Card>
+    </div>
   {:else if filteredSnags.length === 0}
-    <Card>
-      <div class="flex flex-col items-center justify-center py-8 text-center">
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex flex-col items-center justify-center py-10 text-center">
         <p class="text-sm text-zinc-500 dark:text-zinc-400">No snags match your filters</p>
       </div>
-    </Card>
+    </div>
   {:else if viewMode === 'list'}
     <!-- List view -->
-    <Card padding="compact">
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
       <!-- Table header -->
-      <div class="hidden border-b border-zinc-200 px-3 py-2 sm:grid sm:grid-cols-12 sm:gap-3 dark:border-zinc-800">
-        <p class="col-span-4 text-xs font-medium text-zinc-400">Title</p>
-        <p class="col-span-2 text-xs font-medium text-zinc-400">Room</p>
-        <p class="col-span-1 text-xs font-medium text-zinc-400">Severity</p>
-        <p class="col-span-2 text-xs font-medium text-zinc-400">Status</p>
-        <p class="col-span-2 text-xs font-medium text-zinc-400">Contractor</p>
-        <p class="col-span-1 text-xs font-medium text-zinc-400">Date</p>
+      <div class="hidden border-b border-zinc-100 px-4 py-2.5 sm:grid sm:grid-cols-12 sm:gap-3 dark:border-zinc-800">
+        <p class="col-span-5 text-xs font-semibold uppercase tracking-wider text-zinc-400">Title</p>
+        <p class="col-span-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">Room</p>
+        <p class="col-span-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">Status</p>
+        <p class="col-span-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">Severity</p>
+        <p class="col-span-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">Date</p>
       </div>
 
-      <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <div class="divide-y divide-zinc-100 dark:divide-zinc-800/50">
         {#each filteredSnags as snag}
           <a
             href="/snags/{snag.id}"
-            class="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 sm:grid sm:grid-cols-12"
+            class="group flex items-center gap-3 border-l-4 px-4 py-3.5 transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 sm:grid sm:grid-cols-12 {severityBorder(snag.severity)}"
           >
-            <div class="min-w-0 flex-1 sm:col-span-4">
-              <p class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{snag.title}</p>
+            <div class="min-w-0 flex-1 sm:col-span-5">
+              <div class="flex items-center gap-2.5">
+                <span class="h-2 w-2 flex-shrink-0 rounded-full {snag.severity === 'critical' ? 'bg-red-500' : snag.severity === 'major' ? 'bg-amber-500' : 'bg-zinc-300 dark:bg-zinc-600'}"></span>
+                <p class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{snag.title}</p>
+              </div>
             </div>
             <div class="hidden sm:col-span-2 sm:block">
-              <p class="text-sm text-zinc-500 dark:text-zinc-400">{snag.room || '--'}</p>
-            </div>
-            <div class="sm:col-span-1">
-              <Badge variant={severityVariant(snag.severity)} size="sm">
-                {snag.severity}
-              </Badge>
+              {#if snag.room}
+                <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                  {snag.room}
+                </span>
+              {:else}
+                <span class="text-xs text-zinc-300 dark:text-zinc-600">--</span>
+              {/if}
             </div>
             <div class="sm:col-span-2">
               <Badge variant={statusVariant(snag.status)} size="sm">
@@ -320,52 +373,59 @@
               </Badge>
             </div>
             <div class="hidden sm:col-span-2 sm:block">
-              <p class="truncate text-sm text-zinc-500 dark:text-zinc-400">{snag.contractor || '--'}</p>
+              <Badge variant={severityVariant(snag.severity)} size="sm">
+                {snag.severity}
+              </Badge>
             </div>
             <div class="hidden sm:col-span-1 sm:flex sm:items-center sm:justify-between">
               <p class="text-xs text-zinc-400">{formatDate(snag.createdAt)}</p>
-              <ChevronRight size={14} class="text-zinc-300 dark:text-zinc-600" />
+              <ChevronRight size={14} class="text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-600" />
             </div>
           </a>
         {/each}
       </div>
-    </Card>
+    </div>
   {:else}
-    <!-- Kanban view -->
+    <!-- Board / Kanban view -->
     <div class="flex gap-4 overflow-x-auto pb-4">
       {#each kanbanColumns as column}
         {@const columnSnags = snagsByStatus(column.key)}
         <div class="w-64 flex-shrink-0">
-          <div class="mb-2 flex items-center justify-between">
+          <!-- Column header -->
+          <div class="mb-3 flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
             <div class="flex items-center gap-2">
               <Badge variant={column.variant} size="sm">{column.label}</Badge>
-              <span class="text-xs text-zinc-400">{columnSnags.length}</span>
             </div>
+            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-200/80 px-1.5 text-xs font-semibold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+              {columnSnags.length}
+            </span>
           </div>
+
+          <!-- Column cards -->
           <div class="space-y-2">
             {#each columnSnags as snag}
-              <a href="/snags/{snag.id}">
-                <Card interactive padding="compact">
-                  <div class="space-y-2 p-1">
-                    <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{snag.title}</p>
-                    <div class="flex items-center gap-2">
-                      <Badge variant={severityVariant(snag.severity)} size="sm">
-                        {snag.severity}
-                      </Badge>
-                      {#if snag.room}
-                        <span class="text-xs text-zinc-500 dark:text-zinc-400">{snag.room}</span>
-                      {/if}
-                    </div>
-                    {#if snag.contractor}
-                      <p class="text-xs text-zinc-500 dark:text-zinc-400">{snag.contractor}</p>
+              <a href="/snags/{snag.id}" class="block">
+                <div class="rounded-xl border border-zinc-200/50 bg-white p-3.5 shadow-sm transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:border-zinc-700">
+                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{snag.title}</p>
+                  <div class="mt-2.5 flex items-center gap-2">
+                    <Badge variant={severityVariant(snag.severity)} size="sm">
+                      {snag.severity}
+                    </Badge>
+                    {#if snag.room}
+                      <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                        {snag.room}
+                      </span>
                     {/if}
                   </div>
-                </Card>
+                  {#if snag.contractor}
+                    <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">{snag.contractor}</p>
+                  {/if}
+                </div>
               </a>
             {/each}
             {#if columnSnags.length === 0}
-              <div class="rounded-md border border-dashed border-zinc-200 px-3 py-6 text-center dark:border-zinc-700">
-                <p class="text-xs text-zinc-400">No snags</p>
+              <div class="rounded-xl border-2 border-dashed border-zinc-200 px-3 py-8 text-center dark:border-zinc-800">
+                <p class="text-xs text-zinc-400 dark:text-zinc-500">No snags</p>
               </div>
             {/if}
           </div>
@@ -376,7 +436,7 @@
 </div>
 
 <!-- Quick-Add Snag Modal -->
-<Modal bind:open={showAddModal} title="Add Snag">
+<Modal bind:open={showAddModal} title="Report Snag">
   <form method="POST" action="?/create" use:enhance class="space-y-4">
     <Input label="Title" name="title" required placeholder="e.g. Cracked tile in bathroom" />
 
@@ -394,7 +454,7 @@
           <button
             type="button"
             onclick={() => (selectedSeverity = sev)}
-            class="flex-1 rounded-md border px-3 py-2 text-sm font-medium capitalize transition-colors {colors[sev as keyof typeof colors]}"
+            class="flex-1 rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-colors {colors[sev as keyof typeof colors]}"
           >
             {sev}
           </button>
@@ -413,7 +473,7 @@
 
     <div class="flex justify-end gap-3 pt-2">
       <Button variant="secondary" type="button" onclick={() => (showAddModal = false)}>Cancel</Button>
-      <Button type="submit">Add Snag</Button>
+      <Button type="submit">Report Snag</Button>
     </div>
   </form>
 </Modal>

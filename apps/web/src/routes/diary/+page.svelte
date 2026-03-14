@@ -1,7 +1,4 @@
 <script lang="ts">
-  import Card from '$lib/components/ui/Card.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
   import Plus from 'lucide-svelte/icons/plus';
   import BookOpen from 'lucide-svelte/icons/book-open';
   import Flame from 'lucide-svelte/icons/flame';
@@ -14,12 +11,17 @@
   import Wind from 'lucide-svelte/icons/wind';
   import Snowflake from 'lucide-svelte/icons/snowflake';
   import Thermometer from 'lucide-svelte/icons/thermometer';
-  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import TriangleAlert from 'lucide-svelte/icons/triangle-alert';
+  import Camera from 'lucide-svelte/icons/camera';
+  import Users from 'lucide-svelte/icons/users';
+  import Eye from 'lucide-svelte/icons/eye';
+  import ImageIcon from 'lucide-svelte/icons/image';
 
   interface DiaryEntry {
     id: string;
     date: string;
     weather: string | null;
+    temperature?: number | null;
     workersOnSite: string[];
     progress: string | null;
     notes: string | null;
@@ -36,6 +38,7 @@
 
   const entries: DiaryEntry[] = data.entries ?? [];
   const streak: Streak | null = data.streak;
+  const currentPhase: string | null = data.currentPhase ?? null;
 
   const today = new Date();
   let viewYear = $state(today.getFullYear());
@@ -62,19 +65,16 @@
     }
   }
 
-  // Build calendar grid
   const calendarDays = $derived(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
     const lastDay = new Date(viewYear, viewMonth + 1, 0);
     const daysInMonth = lastDay.getDate();
 
-    // Monday = 0, Sunday = 6
     let startDayOfWeek = firstDay.getDay() - 1;
     if (startDayOfWeek < 0) startDayOfWeek = 6;
 
     const days: { date: number; inMonth: boolean; dateStr: string; hasEntry: boolean; isToday: boolean }[] = [];
 
-    // Previous month padding
     const prevMonthLastDay = new Date(viewYear, viewMonth, 0).getDate();
     for (let i = startDayOfWeek - 1; i >= 0; i--) {
       const d = prevMonthLastDay - i;
@@ -84,7 +84,6 @@
       days.push({ date: d, inMonth: false, dateStr, hasEntry: false, isToday: false });
     }
 
-    // Current month
     const entryDates = new Set(entries.map((e) => e.date));
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -99,7 +98,6 @@
       });
     }
 
-    // Next month padding (fill to 42 cells = 6 rows)
     const remaining = 42 - days.length;
     for (let d = 1; d <= remaining; d++) {
       const m = viewMonth === 11 ? 1 : viewMonth + 2;
@@ -117,7 +115,9 @@
       .slice(0, 10)
   );
 
-  const hasConcealedWorks = $derived(entries.some((e) => e.hasConcealedWorks));
+  const isFirstFix = $derived(
+    currentPhase === 'first_fix' || currentPhase === 'firstFix'
+  );
 
   function getWeatherIcon(weather: string | null) {
     switch (weather) {
@@ -137,15 +137,16 @@
     return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
-  function lastEntryLabel(dateStr: string | null): string {
+  function formatLastEntry(dateStr: string | null): string {
     if (!dateStr) return 'No entries yet';
     const [year, month, day] = dateStr.split('-').map(Number);
     const d = new Date(year, month - 1, day);
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     const diffDays = Math.round((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    return d.toLocaleDateString('en-GB', { weekday: 'long' });
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
 
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -156,90 +157,78 @@
   <!-- Header -->
   <div class="flex items-start justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Site Diary</h1>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Site Diary</h1>
+        {#if streak && streak.currentStreak > 0}
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-orange-200/50 dark:ring-orange-800/50">
+            <Flame size={13} />
+            {streak.currentStreak}-day streak
+          </span>
+        {:else}
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            <Clock size={12} />
+            Last entry: {formatLastEntry(streak?.lastEntryDate ?? null)}
+          </span>
+        {/if}
+      </div>
       <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         {entries.length} entr{entries.length !== 1 ? 'ies' : 'y'} recorded
       </p>
     </div>
-    <a href={hasTodayEntry ? `/diary/${todayStr}` : '/diary/new'}>
-      <Button size="sm">
-        <Plus size={16} />
-        {hasTodayEntry ? "Today's Entry" : 'New Entry'}
-      </Button>
+
+    <a
+      href={hasTodayEntry ? `/diary/${todayStr}` : '/diary/new'}
+      class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-600 text-white h-9 px-3.5 text-sm font-medium transition-colors hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600"
+    >
+      <Plus size={15} />
+      {hasTodayEntry ? "Today's Entry" : 'New Entry'}
     </a>
   </div>
 
-  <!-- Streak and concealed works -->
-  <div class="grid gap-4 sm:grid-cols-2">
-    <!-- Streak -->
-    <Card>
-      <div class="flex items-center gap-3">
-        {#if streak && streak.currentStreak > 0}
-          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-orange-100 dark:bg-orange-900/30">
-            <Flame size={20} class="text-orange-500" />
-          </div>
-          <div>
-            <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              {streak.currentStreak}-day streak
-            </p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Keep it going!</p>
-          </div>
-        {:else}
-          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800">
-            <Clock size={20} class="text-zinc-400" />
-          </div>
-          <div>
-            <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-              Last entry: {lastEntryLabel(streak?.lastEntryDate ?? null)}
-            </p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Log today to start a streak</p>
-          </div>
-        {/if}
-      </div>
-    </Card>
-
-    <!-- Concealed works banner -->
-    {#if hasConcealedWorks}
-      <Card class="border-amber-200 dark:border-amber-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-900/30">
-            <AlertTriangle size={20} class="text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Concealed Works Logged</p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">
-              Photos of concealed works are important for warranty
-            </p>
-          </div>
+  <!-- Concealed works banner (first fix phase) -->
+  {#if isFirstFix}
+    <div class="rounded-xl border border-amber-200/50 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/10 shadow-sm border-l-4 border-l-amber-400 dark:border-l-amber-500">
+      <div class="flex items-start gap-3 p-4">
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+          <Camera size={18} class="text-amber-600 dark:text-amber-400" />
         </div>
-      </Card>
-    {/if}
-  </div>
+        <div class="pt-0.5">
+          <p class="text-sm font-medium text-amber-900 dark:text-amber-200">Concealed Works Reminder</p>
+          <p class="mt-0.5 text-sm text-amber-700 dark:text-amber-400/80">
+            Remember to photograph all pipes, wires, and insulation <span class="font-semibold">before</span> they are covered.
+          </p>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Calendar -->
-  <Card>
+  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-4 lg:p-5">
+    <p class="mb-4 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Calendar</p>
+
+    <!-- Month nav -->
     <div class="mb-4 flex items-center justify-between">
       <button
         onclick={prevMonth}
-        class="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={16} />
       </button>
       <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
         {monthNames[viewMonth]} {viewYear}
       </h2>
       <button
         onclick={nextMonth}
-        class="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={16} />
       </button>
     </div>
 
     <!-- Day headers -->
-    <div class="grid grid-cols-7 gap-px">
+    <div class="grid grid-cols-7 gap-px mb-1">
       {#each dayNames as day}
-        <div class="pb-2 text-center text-xs font-medium text-zinc-400">{day}</div>
+        <div class="pb-2 text-center text-[11px] uppercase tracking-wider text-zinc-400 font-medium">{day}</div>
       {/each}
     </div>
 
@@ -249,16 +238,16 @@
         {#if day.inMonth && day.hasEntry}
           <a
             href="/diary/{day.dateStr}"
-            class="relative flex h-10 items-center justify-center rounded-md text-sm transition-colors hover:bg-accent-50 dark:hover:bg-accent-950 {day.isToday ? 'font-semibold text-accent-600 dark:text-accent-400' : 'text-zinc-900 dark:text-zinc-100'}"
+            class="relative flex h-10 items-center justify-center rounded-lg text-sm transition-all hover:bg-accent-50 dark:hover:bg-accent-950 {day.isToday ? 'ring-2 ring-accent-500/50 font-semibold text-accent-600 dark:text-accent-400' : 'text-zinc-900 dark:text-zinc-100'}"
           >
             {day.date}
             <span class="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-accent-500"></span>
           </a>
         {:else}
           <div
-            class="flex h-10 items-center justify-center rounded-md text-sm {day.inMonth
+            class="flex h-10 items-center justify-center rounded-lg text-sm {day.inMonth
               ? day.isToday
-                ? 'font-semibold text-accent-600 dark:text-accent-400'
+                ? 'ring-2 ring-accent-500/50 font-semibold text-accent-600 dark:text-accent-400'
                 : 'text-zinc-900 dark:text-zinc-100'
               : 'text-zinc-300 dark:text-zinc-600'}"
           >
@@ -267,52 +256,75 @@
         {/if}
       {/each}
     </div>
-  </Card>
+  </div>
 
   <!-- Recent entries -->
   <div>
-    <h2 class="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Recent Entries</h2>
+    <p class="mb-3 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Recent Entries</p>
+
     {#if recentEntries.length === 0}
-      <Card>
-        <div class="flex flex-col items-center justify-center py-8 text-center">
-          <BookOpen size={32} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-          <p class="text-sm text-zinc-500 dark:text-zinc-400">No diary entries yet</p>
-          <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Start logging your build progress daily</p>
+      <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm">
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
+            <BookOpen size={24} class="text-zinc-400 dark:text-zinc-500" />
+          </div>
+          <p class="mt-4 text-sm font-medium text-zinc-600 dark:text-zinc-400">No diary entries yet</p>
+          <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            Start logging your build progress daily
+          </p>
         </div>
-      </Card>
+      </div>
     {:else}
-      <Card padding="compact">
-        <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
-          {#each recentEntries as entry}
-            {@const WeatherIcon = getWeatherIcon(entry.weather)}
-            <a
-              href="/diary/{entry.date}"
-              class="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-            >
-              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800">
-                <WeatherIcon size={16} class="text-zinc-500 dark:text-zinc-400" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{formatDate(entry.date)}</p>
-                {#if entry.progress}
-                  <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">{entry.progress}</p>
+      <div class="space-y-2">
+        {#each recentEntries as entry}
+          {@const WeatherIcon = getWeatherIcon(entry.weather)}
+          <a
+            href="/diary/{entry.date}"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-4 transition-all hover:shadow-md"
+          >
+            <!-- Weather icon -->
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
+              <WeatherIcon size={18} class="text-zinc-500 dark:text-zinc-400" />
+            </div>
+
+            <!-- Entry content -->
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{formatDate(entry.date)}</p>
+                {#if entry.temperature != null}
+                  <span class="text-xs text-zinc-400">{entry.temperature}&deg;C</span>
                 {/if}
               </div>
-              <div class="flex flex-shrink-0 items-center gap-2">
-                {#if entry.workersOnSite.length > 0}
-                  <Badge variant="info" size="sm">{entry.workersOnSite.length} on site</Badge>
-                {/if}
-                {#if entry.photoCount > 0}
-                  <Badge variant="not_started" size="sm">{entry.photoCount} photos</Badge>
-                {/if}
-                {#if entry.hasConcealedWorks}
-                  <Badge variant="warning" size="sm">Concealed</Badge>
-                {/if}
-              </div>
-            </a>
-          {/each}
-        </div>
-      </Card>
+              {#if entry.progress}
+                <p class="mt-0.5 truncate text-sm text-zinc-500 dark:text-zinc-400">{entry.progress}</p>
+              {/if}
+            </div>
+
+            <!-- Badges -->
+            <div class="flex flex-shrink-0 items-center gap-2">
+              {#if entry.workersOnSite.length > 0}
+                <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
+                  <Users size={11} />
+                  {entry.workersOnSite.length}
+                </span>
+              {/if}
+              {#if entry.photoCount > 0}
+                <span class="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  <ImageIcon size={11} />
+                  {entry.photoCount}
+                </span>
+              {/if}
+              {#if entry.hasConcealedWorks}
+                <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  <Eye size={11} />
+                  Concealed
+                </span>
+              {/if}
+              <ChevronRight size={16} class="text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400" />
+            </div>
+          </a>
+        {/each}
+      </div>
     {/if}
   </div>
 </div>

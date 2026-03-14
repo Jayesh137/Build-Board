@@ -15,10 +15,135 @@
   --color-accent-950: oklch(0.257 0.09 281.288);
 }
 
+/* ── Base ────────────────────────────────────────────────────────────── */
+
 :root {
   font-variant-numeric: tabular-nums;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   font-family: var(--font-sans);
+}
+
+/* ── Selection ───────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: oklch(0.870 0.065 274.039 / 0.35);
+  color: oklch(0.257 0.09 281.288);
+}
+
+.dark ::selection {
+  background-color: oklch(0.457 0.240 277.023 / 0.4);
+  color: white;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.552 0 0 / 0.25) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: oklch(0.552 0 0 / 0.2);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.552 0 0 / 0.35);
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: oklch(0.552 0 0 / 0.3);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.552 0 0 / 0.5);
+}
+
+/* ── Focus-visible ───────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid oklch(0.585 0.233 277.117);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Interactive element defaults ────────────────────────────────────── */
+
+a,
+button,
+input,
+select,
+textarea,
+[role='button'] {
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Print ───────────────────────────────────────────────────────────── */
+
+@media print {
+  nav,
+  aside,
+  [data-sidebar] {
+    display: none !important;
+  }
+
+  main,
+  [data-content] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
