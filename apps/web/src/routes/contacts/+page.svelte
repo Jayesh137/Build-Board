@@ -12,9 +12,13 @@
   import Star from 'lucide-svelte/icons/star';
   import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
   import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import ChevronDown from 'lucide-svelte/icons/chevron-down';
   import Users from 'lucide-svelte/icons/users';
   import ShieldAlert from 'lucide-svelte/icons/shield-alert';
+  import Shield from 'lucide-svelte/icons/shield';
   import Building2 from 'lucide-svelte/icons/building-2';
+  import CircleCheck from 'lucide-svelte/icons/circle-check';
+  import Circle from 'lucide-svelte/icons/circle';
 
   interface Contact {
     id: string;
@@ -33,6 +37,9 @@
   const contacts: Contact[] = data.contacts ?? [];
 
   let showAddContact = $state(false);
+  let redFlagsExpanded = $state(false);
+  let hiringChecklistExpanded = $state(false);
+  let selectedRole = $state('');
 
   const pinnedContacts = $derived(contacts.filter((c: Contact) => c.isPinned));
   const unpinnedContacts = $derived(contacts.filter((c: Contact) => !c.isPinned));
@@ -83,6 +90,43 @@
     { value: 'Other', label: 'Other' },
   ];
 
+  // Roles that should show the hiring checklist
+  const tradeRoles = new Set([
+    'Builder / Main Contractor',
+    'Electrician',
+    'Plumber',
+    'Groundworker',
+    'Roofer',
+    'Plasterer',
+  ]);
+
+  const isTradeRole = $derived(tradeRoles.has(selectedRole));
+
+  // Hiring checklist items
+  const hiringChecklist = [
+    { label: 'Public liability insurance (minimum \u00A32M) \u2014 check it\'s current, not expired', checked: false },
+    { label: 'Employer\'s liability insurance (if they have employees)', checked: false },
+    { label: 'Ask for 3 recent references and actually call them', checked: false },
+    { label: 'Get at least 3 written quotes with detailed scope of work', checked: false },
+    { label: 'Check for trade body membership (FMB, NAPIT, Gas Safe, etc.)', checked: false },
+  ];
+
+  let checklistState = $state(hiringChecklist.map(() => false));
+
+  function toggleChecklistItem(index: number) {
+    checklistState = checklistState.map((v, i) => i === index ? !v : v);
+  }
+
+  // Red flags data
+  const redFlags = [
+    'Demands 50%+ payment upfront',
+    'No written contract or scope of work',
+    'Pressures you to sign immediately',
+    'Can\'t provide insurance certificates',
+    'Quote is significantly cheaper than others',
+    'No physical business address',
+  ];
+
   function roleBadgeClasses(role: string | null): string {
     if (!role) return 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400';
     const map: Record<string, string> = {
@@ -94,6 +138,14 @@
       'Building Control': 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
     };
     return map[role] ?? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
+  }
+
+  // Reset checklist when modal opens/closes
+  function openAddContactModal() {
+    selectedRole = '';
+    hiringChecklistExpanded = false;
+    checklistState = hiringChecklist.map(() => false);
+    showAddContact = true;
   }
 </script>
 
@@ -108,10 +160,48 @@
         </p>
       {/if}
     </div>
-    <Button onclick={() => (showAddContact = true)} size="sm">
+    <Button onclick={openAddContactModal} size="sm">
       <Plus size={16} />
       Add Contact
     </Button>
+  </div>
+
+  <!-- Red Flags Banner -->
+  <div class="rounded-xl border border-zinc-200/50 bg-zinc-50/50 dark:bg-zinc-900/50 shadow-sm dark:border-zinc-800/50 overflow-hidden">
+    <button
+      onclick={() => (redFlagsExpanded = !redFlagsExpanded)}
+      class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30"
+    >
+      <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+        <Shield size={15} class="text-zinc-500 dark:text-zinc-400" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Red flags when hiring trades</p>
+        <p class="text-xs text-zinc-400 dark:text-zinc-500">Things to watch out for before you commit</p>
+      </div>
+      <span
+        class="transition-transform duration-200 text-zinc-300 dark:text-zinc-600 flex-shrink-0"
+        class:rotate-180={redFlagsExpanded}
+      >
+        <ChevronDown size={16} />
+      </span>
+    </button>
+
+    {#if redFlagsExpanded}
+      <div class="border-t border-zinc-200/50 dark:border-zinc-800/50 px-4 py-3.5">
+        <div class="grid gap-2 sm:grid-cols-2">
+          {#each redFlags as flag}
+            <div class="flex items-center gap-2.5 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/40">
+              <span class="h-2 w-2 rounded-full bg-red-400 flex-shrink-0"></span>
+              <span class="text-sm text-zinc-600 dark:text-zinc-400">{flag}</span>
+            </div>
+          {/each}
+        </div>
+        <p class="mt-3 text-xs text-zinc-400 dark:text-zinc-500 italic">
+          A good tradesperson will happily provide references, insurance, and a detailed written quote. If they push back on these basics, move on.
+        </p>
+      </div>
+    {/if}
   </div>
 
   {#if contacts.length === 0}
@@ -125,7 +215,7 @@
         <p class="mt-1 max-w-xs text-sm text-zinc-400 dark:text-zinc-500">
           Add your architect, builder, and key trades to keep everything in one place.
         </p>
-        <Button onclick={() => (showAddContact = true)} size="sm" class="mt-5">
+        <Button onclick={openAddContactModal} size="sm" class="mt-5">
           <Plus size={16} />
           Add Contact
         </Button>
@@ -322,7 +412,7 @@
   <form method="POST" action="?/create" use:enhance class="space-y-4">
     <Input label="Name" name="name" required placeholder="e.g. John Smith" />
 
-    <Select label="Role" name="role" options={roleOptions} />
+    <Select label="Role" name="role" options={roleOptions} bind:value={selectedRole} />
 
     <Input label="Company" name="company" placeholder="Company name" />
 
@@ -346,6 +436,51 @@
       <input type="checkbox" id="isPinned" name="isPinned" value="true" class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-800" />
       <label for="isPinned" class="text-sm text-zinc-700 dark:text-zinc-300">Pin to top of contacts</label>
     </div>
+
+    <!-- Hiring Checklist (for trade roles only) -->
+    {#if isTradeRole}
+      <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-800/20 overflow-hidden">
+        <button
+          type="button"
+          onclick={() => (hiringChecklistExpanded = !hiringChecklistExpanded)}
+          class="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30"
+        >
+          <Shield size={15} class="text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+          <span class="flex-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">Hiring Checklist</span>
+          <span class="text-[11px] text-zinc-400 mr-1">Before hiring, verify</span>
+          <span
+            class="transition-transform duration-200 text-zinc-300 dark:text-zinc-600"
+            class:rotate-180={hiringChecklistExpanded}
+          >
+            <ChevronDown size={14} />
+          </span>
+        </button>
+
+        {#if hiringChecklistExpanded}
+          <div class="border-t border-zinc-200/50 dark:border-zinc-800/50 px-4 py-3 space-y-2">
+            {#each hiringChecklist as item, index}
+              <button
+                type="button"
+                onclick={() => toggleChecklistItem(index)}
+                class="flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white dark:hover:bg-zinc-800/40 {checklistState[index] ? 'bg-white dark:bg-zinc-800/30' : ''}"
+              >
+                {#if checklistState[index]}
+                  <CircleCheck size={16} class="mt-0.5 text-green-500 flex-shrink-0" />
+                {:else}
+                  <Circle size={16} class="mt-0.5 text-zinc-300 dark:text-zinc-600 flex-shrink-0" />
+                {/if}
+                <span class="text-sm {checklistState[index] ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-700 dark:text-zinc-300'}">
+                  {item.label}
+                </span>
+              </button>
+            {/each}
+            <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500 italic px-3">
+              This checklist is for your reference only and is not saved with the contact.
+            </p>
+          </div>
+        {/if}
+      </div>
+    {/if}
 
     {#if form?.error}
       <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">

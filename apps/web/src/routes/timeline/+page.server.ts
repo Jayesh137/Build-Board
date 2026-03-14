@@ -1,5 +1,6 @@
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
+import { getPhaseGuidance } from '@buildtracker/shared';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -8,9 +9,44 @@ export const load: PageServerLoad = async () => {
     // GET /phases returns a JSON array directly: [{ id, name, sortOrder, status, tasks: [...] }, ...]
     const phasesData = await api.get<any>('/phases?include=tasks');
     const phases = Array.isArray(phasesData) ? phasesData : [];
-    return { phases };
+
+    // Determine current phase: first in_progress, or first not_started, or first overall
+    let currentPhase: any = null;
+    for (const phase of phases) {
+      if (phase.status === 'in_progress') {
+        currentPhase = phase;
+        break;
+      }
+    }
+    if (!currentPhase) {
+      for (const phase of phases) {
+        if (phase.status !== 'done') {
+          currentPhase = phase;
+          break;
+        }
+      }
+    }
+    if (!currentPhase && phases.length > 0) {
+      currentPhase = phases[0];
+    }
+
+    const currentPhaseName = currentPhase?.name ?? 'Pre-Construction';
+    const phaseGuidance = getPhaseGuidance(currentPhaseName);
+
+    return {
+      phases,
+      currentPhaseName,
+      phaseGuidance: phaseGuidance ? {
+        phaseName: currentPhaseName,
+        summary: phaseGuidance.summary,
+        whatToFocus: phaseGuidance.whatToFocus,
+        tips: phaseGuidance.tips,
+        commonMistakes: phaseGuidance.commonMistakes,
+        keyDecisions: phaseGuidance.keyDecisions,
+      } : null,
+    };
   } catch {
-    return { phases: [] };
+    return { phases: [], currentPhaseName: null, phaseGuidance: null };
   }
 };
 

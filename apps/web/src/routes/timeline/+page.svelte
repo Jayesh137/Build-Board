@@ -10,6 +10,12 @@
   import ChevronDown from 'lucide-svelte/icons/chevron-down';
   import Search from 'lucide-svelte/icons/search';
   import ListChecks from 'lucide-svelte/icons/list-checks';
+  import X from 'lucide-svelte/icons/x';
+  import Lightbulb from 'lucide-svelte/icons/lightbulb';
+  import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
+  import Clock from 'lucide-svelte/icons/clock';
+  import BookOpen from 'lucide-svelte/icons/book-open';
+
 
   interface Phase {
     id: string;
@@ -30,9 +36,31 @@
     sortOrder: number;
   }
 
+  interface KeyDecision {
+    title: string;
+    why: string;
+    leadTime: string;
+  }
+
+  interface PhaseGuidanceData {
+    phaseName: string;
+    summary: string;
+    whatToFocus: string[];
+    tips: { content: string; importance: string }[];
+    commonMistakes: string[];
+    keyDecisions: KeyDecision[];
+  }
+
   let { data, form } = $props();
 
   const phases: Phase[] = data.phases ?? [];
+  const phaseGuidance: PhaseGuidanceData | null = data.phaseGuidance ?? null;
+  const currentPhaseName: string | null = data.currentPhaseName ?? null;
+
+  // Phase briefing state
+  let briefingExpanded = $state(true);
+  let mistakesExpanded = $state(false);
+  let tipExpanded = $state(false);
 
   // Filter state
   let searchQuery = $state('');
@@ -115,6 +143,8 @@
     const done = tasks.filter((t: Task) => t.status === 'done').length;
     return Math.round((done / tasks.length) * 100);
   }
+
+  const firstTip = $derived(phaseGuidance?.tips?.[0] ?? null);
 </script>
 
 <div class="space-y-6">
@@ -134,6 +164,136 @@
       Add Task
     </button>
   </div>
+
+  <!-- Phase Briefing Card -->
+  {#if phaseGuidance}
+    <div class="relative rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
+      <!-- Gradient left border -->
+      <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-indigo-500 to-violet-500"></div>
+
+      {#if briefingExpanded}
+        <!-- Dismiss button -->
+        <button
+          onclick={() => (briefingExpanded = false)}
+          class="absolute right-3 top-3 rounded-lg p-1.5 text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-zinc-500 dark:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-400 z-10"
+          title="Minimize guide"
+        >
+          <X size={16} />
+        </button>
+
+        <div class="pl-5 pr-12 py-5 space-y-5">
+          <!-- Phase header -->
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <BookOpen size={15} class="text-indigo-500 dark:text-indigo-400" />
+              <span class="text-[11px] uppercase tracking-wider text-indigo-500 dark:text-indigo-400 font-semibold">Phase Guide</span>
+            </div>
+            <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{phaseGuidance.phaseName}</h2>
+            <p class="mt-1 text-sm italic text-zinc-500 dark:text-zinc-400 leading-relaxed">{phaseGuidance.summary}</p>
+          </div>
+
+          <!-- What to focus on -->
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium mb-2.5">What to focus on</p>
+            <ul class="space-y-2">
+              {#each phaseGuidance.whatToFocus as item}
+                <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                  <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
+                  <span>{item}</span>
+                </li>
+              {/each}
+            </ul>
+          </div>
+
+          <!-- Tip card -->
+          {#if firstTip}
+            <div>
+              <button
+                onclick={() => (tipExpanded = !tipExpanded)}
+                class="w-full text-left"
+              >
+                <div class="rounded-lg bg-amber-50/80 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/30 px-4 py-3 transition-colors hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                  <div class="flex items-center gap-2">
+                    <Lightbulb size={15} class="text-amber-500 flex-shrink-0" />
+                    <span class="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-medium">Tip</span>
+                    <span
+                      class="ml-auto transition-transform duration-200 text-amber-400"
+                      class:rotate-180={tipExpanded}
+                    >
+                      <ChevronDown size={14} />
+                    </span>
+                  </div>
+                  {#if tipExpanded}
+                    <p class="mt-2 text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{firstTip.content}</p>
+                  {/if}
+                </div>
+              </button>
+            </div>
+          {/if}
+
+          <!-- Common mistakes (collapsible) -->
+          {#if phaseGuidance.commonMistakes.length > 0}
+            <div>
+              <button
+                onclick={() => (mistakesExpanded = !mistakesExpanded)}
+                class="flex items-center gap-2 text-left group w-full"
+              >
+                <AlertTriangle size={14} class="text-red-400 dark:text-red-500 flex-shrink-0" />
+                <span class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Common mistakes to avoid</span>
+                <span
+                  class="ml-1 transition-transform duration-200 text-zinc-300 dark:text-zinc-600"
+                  class:rotate-180={mistakesExpanded}
+                >
+                  <ChevronDown size={14} />
+                </span>
+              </button>
+              {#if mistakesExpanded}
+                <div class="mt-2.5 space-y-1.5">
+                  {#each phaseGuidance.commonMistakes as mistake}
+                    <div class="flex items-start gap-2.5 rounded-lg bg-red-50/60 dark:bg-red-900/10 border border-red-100/60 dark:border-red-900/20 px-3 py-2.5">
+                      <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-400 flex-shrink-0"></span>
+                      <span class="text-sm text-red-700 dark:text-red-400">{mistake}</span>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/if}
+
+          <!-- Key decisions with lead times -->
+          {#if phaseGuidance.keyDecisions.length > 0}
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium mb-2.5">Key decisions</p>
+              <div class="space-y-2">
+                {#each phaseGuidance.keyDecisions as decision}
+                  <div class="flex items-start justify-between gap-3 rounded-lg border border-zinc-100 dark:border-zinc-800/60 px-3.5 py-2.5">
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{decision.title}</p>
+                      <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">{decision.why}</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 px-2.5 py-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 flex-shrink-0 whitespace-nowrap">
+                      <Clock size={11} />
+                      {decision.leadTime}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        </div>
+      {:else}
+        <!-- Collapsed state -->
+        <button
+          onclick={() => (briefingExpanded = true)}
+          class="flex w-full items-center gap-3 pl-5 pr-4 py-3 text-left transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
+        >
+          <BookOpen size={15} class="text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+          <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{phaseGuidance.phaseName}</span>
+          <span class="text-xs text-indigo-500 dark:text-indigo-400 font-medium hover:underline ml-auto">Show guide</span>
+        </button>
+      {/if}
+    </div>
+  {/if}
 
   <!-- Filter bar -->
   <div class="rounded-xl border border-zinc-200/50 bg-white p-3 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
