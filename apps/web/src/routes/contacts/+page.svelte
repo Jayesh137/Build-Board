@@ -1,8 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
@@ -14,6 +12,9 @@
   import Star from 'lucide-svelte/icons/star';
   import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
   import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import Users from 'lucide-svelte/icons/users';
+  import ShieldAlert from 'lucide-svelte/icons/shield-alert';
+  import Building2 from 'lucide-svelte/icons/building-2';
 
   interface Contact {
     id: string;
@@ -33,7 +34,6 @@
 
   let showAddContact = $state(false);
 
-  // Group contacts by role
   const pinnedContacts = $derived(contacts.filter((c: Contact) => c.isPinned));
   const unpinnedContacts = $derived(contacts.filter((c: Contact) => !c.isPinned));
 
@@ -47,25 +47,22 @@
     return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   });
 
-  function isInsuranceExpiring(expiry: string | null): boolean {
-    if (!expiry) return false;
+  function daysUntilInsuranceExpiry(expiry: string | null): number | null {
+    if (!expiry) return null;
     const [year, month, day] = expiry.split('-').map(Number);
     const expiryDate = new Date(year, month - 1, day);
     const now = new Date();
-    const daysLeft = Math.round((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return daysLeft >= 0 && daysLeft < 30;
+    return Math.round((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  function isInsuranceExpiring(expiry: string | null): boolean {
+    const days = daysUntilInsuranceExpiry(expiry);
+    return days !== null && days >= 0 && days < 30;
   }
 
   function isInsuranceExpired(expiry: string | null): boolean {
-    if (!expiry) return false;
-    const [year, month, day] = expiry.split('-').map(Number);
-    const expiryDate = new Date(year, month - 1, day);
-    return expiryDate < new Date();
-  }
-
-  function renderStars(rating: number | null): string {
-    if (!rating) return '';
-    return '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating);
+    const days = daysUntilInsuranceExpiry(expiry);
+    return days !== null && days < 0;
   }
 
   const roleOptions = [
@@ -85,16 +82,31 @@
     { value: 'Planning Consultant', label: 'Planning Consultant' },
     { value: 'Other', label: 'Other' },
   ];
+
+  function roleBadgeClasses(role: string | null): string {
+    if (!role) return 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400';
+    const map: Record<string, string> = {
+      'Architect': 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400',
+      'Structural Engineer': 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+      'Builder / Main Contractor': 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+      'Electrician': 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+      'Plumber': 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400',
+      'Building Control': 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+    };
+    return map[role] ?? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
+  }
 </script>
 
-<div class="space-y-6">
+<div class="space-y-8">
   <!-- Header -->
-  <div class="flex items-start justify-between gap-4">
+  <div class="flex items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Contacts</h1>
-      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
-      </p>
+      <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Contacts</h1>
+      {#if contacts.length > 0}
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          {contacts.length} contact{contacts.length !== 1 ? 's' : ''} in your project
+        </p>
+      {/if}
     </div>
     <Button onclick={() => (showAddContact = true)} size="sm">
       <Plus size={16} />
@@ -103,132 +115,204 @@
   </div>
 
   {#if contacts.length === 0}
-    <Card>
-      <div class="flex flex-col items-center justify-center py-12 text-center">
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">No contacts yet</p>
-        <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Add your builders, architects, and other contacts</p>
+    <!-- Empty state -->
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex flex-col items-center justify-center px-6 py-16 text-center">
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <Users size={24} class="text-zinc-400" />
+        </div>
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">No contacts yet</p>
+        <p class="mt-1 max-w-xs text-sm text-zinc-400 dark:text-zinc-500">
+          Add your architect, builder, and key trades to keep everything in one place.
+        </p>
+        <Button onclick={() => (showAddContact = true)} size="sm" class="mt-5">
+          <Plus size={16} />
+          Add Contact
+        </Button>
       </div>
-    </Card>
+    </div>
   {:else}
     <!-- Pinned contacts -->
     {#if pinnedContacts.length > 0}
-      <div>
-        <div class="mb-2 flex items-center gap-1.5">
-          <Pin size={14} class="text-indigo-500" />
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Pinned</h2>
+      <section>
+        <div class="mb-3 flex items-center gap-2">
+          <Pin size={13} class="text-indigo-500" />
+          <span class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Pinned</span>
         </div>
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {#each pinnedContacts as contact}
-            <a href="/contacts/{contact.id}">
-              <Card interactive>
-                <div class="space-y-2">
-                  <div class="flex items-start justify-between">
-                    <div>
-                      <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{contact.name}</p>
-                      {#if contact.role}
-                        <p class="text-xs text-zinc-500 dark:text-zinc-400">{contact.role}</p>
-                      {/if}
-                    </div>
-                    <Pin size={14} class="flex-shrink-0 text-indigo-500" />
-                  </div>
-                  {#if contact.company}
-                    <p class="text-xs text-zinc-500">{contact.company}</p>
-                  {/if}
-                  <div class="flex items-center gap-3">
-                    {#if contact.phone}
-                      <a
-                        href="tel:{contact.phone}"
-                        class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-                        onclick={(e) => e.stopPropagation()}
-                      >
-                        <Phone size={12} />
-                        {contact.phone}
-                      </a>
+            <a href="/contacts/{contact.id}" class="group block">
+              <div class="relative rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-all duration-150 hover:shadow-md hover:border-zinc-300/60 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:border-zinc-700/60">
+                <!-- Pin indicator -->
+                <div class="absolute right-4 top-4">
+                  <Pin size={13} class="text-indigo-400/60" />
+                </div>
+
+                <!-- Name + role -->
+                <div class="pr-6">
+                  <h3 class="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{contact.name}</h3>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                    {#if contact.role}
+                      <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium {roleBadgeClasses(contact.role)}">
+                        {contact.role}
+                      </span>
                     {/if}
-                    {#if contact.email}
-                      <a
-                        href="mailto:{contact.email}"
-                        class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-                        onclick={(e) => e.stopPropagation()}
-                      >
-                        <Mail size={12} />
-                        Email
-                      </a>
-                    {/if}
-                  </div>
-                  <div class="flex items-center gap-2">
-                    {#if contact.rating}
-                      <span class="text-xs text-amber-500">{renderStars(contact.rating)}</span>
-                    {/if}
-                    {#if isInsuranceExpiring(contact.insuranceExpiry)}
-                      <Badge variant="warning" size="sm">Insurance expiring</Badge>
-                    {/if}
-                    {#if isInsuranceExpired(contact.insuranceExpiry)}
-                      <Badge variant="critical" size="sm">Insurance expired</Badge>
+                    {#if contact.company}
+                      <span class="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
+                        <Building2 size={11} />
+                        {contact.company}
+                      </span>
                     {/if}
                   </div>
                 </div>
-              </Card>
+
+                <!-- Contact details -->
+                <div class="mt-4 flex flex-col gap-2">
+                  {#if contact.phone}
+                    <a
+                      href="tel:{contact.phone}"
+                      class="inline-flex items-center gap-2 text-[13px] text-zinc-600 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400"
+                      onclick={(e) => e.stopPropagation()}
+                    >
+                      <Phone size={13} class="text-zinc-400" />
+                      {contact.phone}
+                    </a>
+                  {/if}
+                  {#if contact.email}
+                    <a
+                      href="mailto:{contact.email}"
+                      class="inline-flex items-center gap-2 text-[13px] text-zinc-600 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400"
+                      onclick={(e) => e.stopPropagation()}
+                    >
+                      <Mail size={13} class="text-zinc-400" />
+                      {contact.email}
+                    </a>
+                  {/if}
+                </div>
+
+                <!-- Footer: stars + insurance -->
+                <div class="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800/80">
+                  <!-- Stars -->
+                  <div class="flex items-center gap-0.5">
+                    {#each Array(5) as _, i}
+                      <Star
+                        size={14}
+                        class={i < (contact.rating ?? 0)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-zinc-200 dark:text-zinc-700'}
+                      />
+                    {/each}
+                  </div>
+
+                  <!-- Insurance warnings -->
+                  {#if isInsuranceExpiring(contact.insuranceExpiry)}
+                    {@const days = daysUntilInsuranceExpiry(contact.insuranceExpiry)}
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                      <ShieldAlert size={11} />
+                      Expires in {days}d
+                    </span>
+                  {/if}
+                  {#if isInsuranceExpired(contact.insuranceExpiry)}
+                    <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:bg-red-900/20 dark:text-red-400">
+                      <ShieldAlert size={11} />
+                      Insurance expired
+                    </span>
+                  {/if}
+                </div>
+              </div>
             </a>
           {/each}
         </div>
-      </div>
+      </section>
     {/if}
 
     <!-- Contacts by role -->
     {#each contactsByRole() as [role, roleContacts]}
-      <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">{role}</h2>
-        <Card padding="compact">
+      <section>
+        <span class="mb-3 block text-[11px] uppercase tracking-wider text-zinc-400 font-medium">{role}</span>
+        <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
           {#each roleContacts as contact, i}
             <a
               href="/contacts/{contact.id}"
-              class="flex min-h-[44px] items-center gap-3 border-b border-zinc-200 px-3 py-2.5 transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/50"
+              class="group flex min-h-[52px] items-center gap-4 px-5 py-3.5 transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40
+                {i < roleContacts.length - 1 ? 'border-b border-zinc-100 dark:border-zinc-800/60' : ''}"
             >
-              <div class="flex-1 min-w-0">
+              <!-- Avatar placeholder -->
+              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                {contact.name.charAt(0).toUpperCase()}
+              </div>
+
+              <!-- Name + company -->
+              <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
-                  <p class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{contact.name}</p>
-                  {#if contact.rating}
-                    <span class="flex-shrink-0 text-xs text-amber-500">{renderStars(contact.rating)}</span>
+                  <p class="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{contact.name}</p>
+                  {#if contact.role}
+                    <span class="hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium {roleBadgeClasses(contact.role)}">
+                      {contact.role}
+                    </span>
                   {/if}
                 </div>
                 {#if contact.company}
-                  <p class="truncate text-xs text-zinc-500">{contact.company}</p>
+                  <p class="mt-0.5 truncate text-xs text-zinc-400 dark:text-zinc-500">{contact.company}</p>
                 {/if}
               </div>
-              <div class="flex flex-shrink-0 items-center gap-3">
+
+              <!-- Quick actions + warnings -->
+              <div class="flex flex-shrink-0 items-center gap-2">
+                <!-- Stars (compact) -->
+                {#if contact.rating}
+                  <div class="hidden sm:flex items-center gap-0.5">
+                    {#each Array(5) as _, i}
+                      <Star
+                        size={11}
+                        class={i < contact.rating
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-zinc-200 dark:text-zinc-700'}
+                      />
+                    {/each}
+                  </div>
+                {/if}
+
+                {#if isInsuranceExpiring(contact.insuranceExpiry)}
+                  <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                    <AlertTriangle size={10} />
+                    Ins. expiring
+                  </span>
+                {/if}
+                {#if isInsuranceExpired(contact.insuranceExpiry)}
+                  <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700 dark:bg-red-900/20 dark:text-red-400">
+                    <AlertTriangle size={10} />
+                    Ins. expired
+                  </span>
+                {/if}
+
                 {#if contact.phone}
                   <a
                     href="tel:{contact.phone}"
-                    class="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+                    class="rounded-lg p-2 text-zinc-300 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
                     onclick={(e) => e.stopPropagation()}
                     title="Call {contact.name}"
                   >
-                    <Phone size={14} />
+                    <Phone size={15} />
                   </a>
                 {/if}
                 {#if contact.email}
                   <a
                     href="mailto:{contact.email}"
-                    class="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+                    class="rounded-lg p-2 text-zinc-300 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
                     onclick={(e) => e.stopPropagation()}
                     title="Email {contact.name}"
                   >
-                    <Mail size={14} />
+                    <Mail size={15} />
                   </a>
                 {/if}
-                {#if isInsuranceExpiring(contact.insuranceExpiry)}
-                  <Badge variant="warning" size="sm">Ins. expiring</Badge>
-                {/if}
-                {#if isInsuranceExpired(contact.insuranceExpiry)}
-                  <Badge variant="critical" size="sm">Ins. expired</Badge>
-                {/if}
-                <ChevronRight size={16} class="text-zinc-300 dark:text-zinc-600" />
+
+                <ChevronRight size={16} class="text-zinc-300 transition-transform group-hover:translate-x-0.5 dark:text-zinc-600" />
               </div>
             </a>
           {/each}
-        </Card>
-      </div>
+        </div>
+      </section>
     {/each}
   {/if}
 </div>
@@ -258,16 +342,18 @@
 
     <Textarea label="Notes" name="notes" placeholder="Any additional notes..." rows={3} />
 
-    <div class="flex items-center gap-2">
-      <input type="checkbox" id="isPinned" name="isPinned" value="true" class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500" />
-      <label for="isPinned" class="text-sm text-zinc-700 dark:text-zinc-300">Pin to top</label>
+    <div class="flex items-center gap-2.5">
+      <input type="checkbox" id="isPinned" name="isPinned" value="true" class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-800" />
+      <label for="isPinned" class="text-sm text-zinc-700 dark:text-zinc-300">Pin to top of contacts</label>
     </div>
 
     {#if form?.error}
-      <p class="text-sm text-red-600">{form.error}</p>
+      <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+        {form.error}
+      </div>
     {/if}
 
-    <div class="flex justify-end gap-3 pt-2">
+    <div class="flex justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
       <Button variant="secondary" type="button" onclick={() => (showAddContact = false)}>Cancel</Button>
       <Button type="submit">Add Contact</Button>
     </div>

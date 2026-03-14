@@ -17,6 +17,7 @@
   import Menu from 'lucide-svelte/icons/menu';
   import X from 'lucide-svelte/icons/x';
   import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+  import MapPin from 'lucide-svelte/icons/map-pin';
   import { page } from '$app/stores';
   import { goto, invalidateAll } from '$app/navigation';
 
@@ -92,101 +93,133 @@
   }
 </script>
 
-  <div class="flex h-full">
-    <!-- Mobile sidebar backdrop -->
-    {#if sidebarOpen}
-      <button
-        class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-        onclick={() => (sidebarOpen = false)}
-        aria-label="Close sidebar"
-      ></button>
-    {/if}
+<div class="flex h-full">
+  <!-- Mobile sidebar backdrop -->
+  {#if sidebarOpen}
+    <button
+      class="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] lg:hidden transition-opacity duration-200 ease-out"
+      onclick={() => (sidebarOpen = false)}
+      aria-label="Close sidebar"
+    ></button>
+  {/if}
 
-    <!-- Sidebar -->
-    <aside
-      class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-zinc-200 bg-white transition-all duration-200 dark:border-zinc-800 dark:bg-zinc-900 lg:static {sidebarCollapsed ? 'w-16' : 'w-60'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
-    >
-      <!-- Header -->
-      <div class="flex h-14 items-center gap-3 border-b border-zinc-200 px-4 dark:border-zinc-800">
-        {#if !sidebarCollapsed}
-          <div class="flex-1 truncate">
-            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</p>
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-zinc-200/80 bg-white transition-all duration-200 ease-out dark:border-zinc-800/50 dark:bg-zinc-950 lg:static {sidebarCollapsed ? 'w-16' : 'w-60'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
+  >
+    <!-- Header -->
+    <div class="border-b border-zinc-200/80 px-4 pb-4 pt-5 dark:border-zinc-800/50">
+      {#if !sidebarCollapsed}
+        <div class="flex items-start justify-between">
+          <div class="min-w-0 flex-1">
+            <p class="text-[10px] uppercase tracking-widest text-zinc-400">BuildBoard</p>
+            <p class="mt-1 text-base font-semibold text-zinc-900 dark:text-zinc-100">Little Lodge</p>
+            <div class="mt-1 flex items-center gap-1">
+              <MapPin size={12} class="shrink-0 text-zinc-400" />
+              <p class="truncate text-xs text-zinc-500 dark:text-zinc-500">Grange View Road, N20</p>
+            </div>
           </div>
+          <button
+            onclick={() => (sidebarCollapsed = !sidebarCollapsed)}
+            class="hidden shrink-0 rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 lg:block"
+            aria-label="Toggle sidebar"
+          >
+            <ChevronLeft size={16} class="transition-transform duration-200" />
+          </button>
+          <button
+            onclick={() => (sidebarOpen = false)}
+            class="shrink-0 rounded p-1 text-zinc-400 hover:bg-zinc-100 lg:hidden"
+            aria-label="Close sidebar"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="mt-3">
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <div
+              class="h-full rounded-full bg-accent-500 transition-all duration-500 ease-out"
+              style="width: 0%"
+            ></div>
+          </div>
+          <p class="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">0% complete</p>
+        </div>
+      {:else}
+        <div class="flex justify-center">
+          <button
+            onclick={() => (sidebarCollapsed = !sidebarCollapsed)}
+            class="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="Toggle sidebar"
+          >
+            <ChevronLeft size={16} class="rotate-180 transition-transform duration-200" />
+          </button>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto px-2 py-3">
+      {#each navGroups as group, groupIdx}
+        {#if !sidebarCollapsed}
+          <p class="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 {groupIdx === 0 ? 'mt-0' : 'mt-6'}">
+            {group.label}
+          </p>
+        {:else}
+          <div class="{groupIdx === 0 ? '' : 'my-3'} border-t border-zinc-100 dark:border-zinc-800 {groupIdx === 0 ? 'hidden' : ''}"></div>
         {/if}
-        <button
-          onclick={() => (sidebarCollapsed = !sidebarCollapsed)}
-          class="hidden rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 lg:block"
-          aria-label="Toggle sidebar"
-        >
-          <ChevronLeft size={16} class="{sidebarCollapsed ? 'rotate-180' : ''} transition-transform" />
-        </button>
-        <button
-          onclick={() => (sidebarOpen = false)}
-          class="rounded p-1 text-zinc-400 hover:bg-zinc-100 lg:hidden"
-          aria-label="Close sidebar"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="flex-1 overflow-y-auto px-2 py-3">
-        {#each navGroups as group}
-          {#if !sidebarCollapsed}
-            <p class="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 first:mt-0">
-              {group.label}
-            </p>
-          {:else}
-            <div class="my-2 border-t border-zinc-100 dark:border-zinc-800"></div>
-          {/if}
-          {#each group.items as item}
-            {@const active = isActive(item.href, $page.url.pathname)}
-            <a
-              href={item.href}
-              class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors {active
-                ? 'bg-accent-50 font-semibold text-accent-600 dark:bg-accent-950 dark:text-accent-400'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'}"
-              onclick={() => (sidebarOpen = false)}
-            >
-              <item.icon size={18} />
-              {#if !sidebarCollapsed}
-                <span>{item.label}</span>
-              {/if}
-            </a>
-          {/each}
+        {#each group.items as item}
+          {@const active = isActive(item.href, $page.url.pathname)}
+          <a
+            href={item.href}
+            class="group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 ease-out
+              {active
+                ? 'border-l-[3px] border-accent-500 bg-accent-50/50 pl-[9px] font-semibold text-accent-600 dark:bg-accent-950/30 dark:text-accent-400'
+                : 'border-l-[3px] border-transparent pl-[9px] text-zinc-600 hover:translate-x-0.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}"
+            onclick={() => (sidebarOpen = false)}
+          >
+            <item.icon size={18} class="shrink-0" />
+            {#if !sidebarCollapsed}
+              <span class="truncate">{item.label}</span>
+            {/if}
+          </a>
         {/each}
-      </nav>
+      {/each}
+    </nav>
 
-      <!-- Footer -->
-      <div class="border-t border-zinc-200 px-2 py-3 dark:border-zinc-800">
-        <a
-          href="/settings"
-          class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-        >
-          <Settings size={18} />
-          {#if !sidebarCollapsed}
-            <span>Settings</span>
-          {/if}
-        </a>
-      </div>
-    </aside>
+    <!-- Footer -->
+    <div class="border-t border-zinc-200/80 px-2 py-3 dark:border-zinc-800/50">
+      <a
+        href="/settings"
+        class="group flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-600 transition-all duration-200 ease-out hover:translate-x-0.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+      >
+        <Settings size={18} />
+        {#if !sidebarCollapsed}
+          <span class="flex-1">Settings</span>
+          <span class="text-[10px] text-zinc-400 dark:text-zinc-600">v1.0</span>
+        {/if}
+      </a>
+    </div>
+  </aside>
 
-    <!-- Main content -->
-    <main class="flex-1 overflow-y-auto">
-      <!-- Mobile top bar -->
-      <div class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/95 lg:hidden">
-        <button
-          onclick={() => (sidebarOpen = true)}
-          class="rounded p-1 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-          aria-label="Open menu"
-        >
-          <Menu size={20} />
-        </button>
-        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">BuildBoard</p>
+  <!-- Main content -->
+  <main class="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900">
+    <!-- Mobile top bar -->
+    <div class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur-sm dark:border-zinc-800/50 dark:bg-zinc-950/95 lg:hidden">
+      <button
+        onclick={() => (sidebarOpen = true)}
+        class="rounded p-1 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+        aria-label="Open menu"
+      >
+        <Menu size={20} />
+      </button>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Little Lodge</p>
       </div>
+    </div>
 
-      <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-        {@render children()}
-      </div>
-    </main>
-  </div>
+    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+      {@render children()}
+    </div>
+  </main>
+</div>
