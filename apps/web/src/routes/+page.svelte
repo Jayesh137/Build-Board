@@ -5,25 +5,11 @@
   import Receipt from 'lucide-svelte/icons/receipt';
   import AlertTriangle from 'lucide-svelte/icons/triangle-alert';
   import GitBranch from 'lucide-svelte/icons/git-branch';
-  import Clock from 'lucide-svelte/icons/clock';
   import ArrowRight from 'lucide-svelte/icons/arrow-right';
   import Shield from 'lucide-svelte/icons/shield';
   import CircleCheck from 'lucide-svelte/icons/circle-check';
-  import Info from 'lucide-svelte/icons/info';
   import MapPin from 'lucide-svelte/icons/map-pin';
-  import ChevronDown from 'lucide-svelte/icons/chevron-down';
-  import ChevronUp from 'lucide-svelte/icons/chevron-up';
-  import PoundSterling from 'lucide-svelte/icons/pound-sterling';
-  import BookOpen from 'lucide-svelte/icons/book-open';
-  import Bug from 'lucide-svelte/icons/bug';
-  import Plus from 'lucide-svelte/icons/plus';
-  import FileCheck from 'lucide-svelte/icons/file-check';
-  import Landmark from 'lucide-svelte/icons/landmark';
-  import Target from 'lucide-svelte/icons/target';
-  import Compass from 'lucide-svelte/icons/compass';
-  import Lightbulb from 'lucide-svelte/icons/lightbulb';
-  import CircleAlert from 'lucide-svelte/icons/circle-alert';
-  import OctagonAlert from 'lucide-svelte/icons/octagon-alert';
+  import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
 
   interface Props {
     data: {
@@ -37,52 +23,16 @@
         progress: number;
         currentPhase: string;
       } | null;
-      alerts: Array<{
-        id: string;
-        priority: 'critical' | 'warning' | 'info';
-        title: string;
-        description: string;
-        link: string;
-      }>;
-      budget: {
-        total: number;
-        spent: number;
-        committed: number;
-        remaining: number;
-        contingencyRemaining: number;
-        contingencyPct: number;
-      } | null;
-      recentTasks: Array<{
-        id: string;
-        title: string;
-        status: string;
-        dueDate: string | null;
-      }>;
-      milestones: Array<{
-        id: string;
-        title: string;
-        dueDate: string | null;
-        status: string;
-      }>;
+      alerts: Array<{ id: string; priority: string; title: string; description: string; link: string }>;
+      budget: { total: number; spent: number; committed: number; remaining: number; contingencyRemaining: number; contingencyPct: number } | null;
+      recentTasks: Array<{ id: string; title: string; status: string; dueDate: string | null }>;
+      milestones: Array<{ id: string; title: string; dueDate: string | null; status: string }>;
       snagCount: number;
       decisionCount: number;
       conditionCount: number;
       vatTotal: number;
-      nextActions: Array<{
-        priority: 'critical' | 'high' | 'medium' | 'low';
-        type: string;
-        title: string;
-        reason: string;
-        guidance: string;
-        link: string;
-      }>;
-      phaseGuidance: {
-        summary: string;
-        whatToFocus: string[];
-        tips: Array<{ content: string; importance: string }>;
-        commonMistakes: string[];
-        keyDecisions: Array<{ title: string; why: string; leadTime: string }>;
-      } | null;
+      nextActions: any[];
+      phaseGuidance: any;
       currentPhase: string | null;
       progress: number;
     };
@@ -90,73 +40,33 @@
 
   let { data }: Props = $props();
 
-  let alertsExpanded = $state(false);
-  let mistakesExpanded = $state(false);
-
   let progress = $derived(data.project?.progress ?? 0);
-  let currentPhase = $derived(data.project?.currentPhase ?? data.currentPhase ?? null);
-
-  let daysIntoProject = $derived.by(() => {
-    if (!data.project?.startDate) return 0;
-    const start = new Date(data.project.startDate);
-    const now = new Date();
-    return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  });
-
-  // Pick a rotating tip based on the current date (changes daily)
-  let rotatingTip = $derived.by(() => {
-    if (!data.phaseGuidance?.tips?.length) return null;
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const index = dayOfYear % data.phaseGuidance.tips.length;
-    return data.phaseGuidance.tips[index];
-  });
-
-  let hasCriticalActions = $derived(
-    data.nextActions.some((a) => a.priority === 'critical')
-  );
-
-  let primaryAction = $derived(data.nextActions[0] ?? null);
-  let secondaryActions = $derived(data.nextActions.slice(1, 4));
+  let currentPhase = $derived(data.project?.currentPhase ?? 'Phase A: Pre-Construction');
 
   const phaseSegments = [
-    { name: 'A', label: 'Pre-Construction', pct: 5 },
-    { name: 'B', label: 'Groundworks', pct: 5 },
-    { name: 'C', label: 'Foundations', pct: 8 },
-    { name: 'D', label: 'Superstructure', pct: 15 },
-    { name: 'E', label: 'Roof', pct: 10 },
-    { name: 'F', label: 'First Fix', pct: 15 },
-    { name: 'G', label: 'Plastering', pct: 7 },
-    { name: 'H', label: 'Second Fix', pct: 15 },
-    { name: 'I', label: 'External', pct: 8 },
-    { name: 'J', label: 'Testing', pct: 7 },
-    { name: 'K', label: 'Completion', pct: 5 },
+    { name: 'A', label: 'Pre-Construction' },
+    { name: 'B', label: 'Groundworks' },
+    { name: 'C', label: 'Foundations' },
+    { name: 'D', label: 'Superstructure' },
+    { name: 'E', label: 'Roof' },
+    { name: 'F', label: 'First Fix' },
+    { name: 'G', label: 'Plastering' },
+    { name: 'H', label: 'Second Fix' },
+    { name: 'I', label: 'External' },
+    { name: 'J', label: 'Testing' },
+    { name: 'K', label: 'Completion' },
   ];
 
-  function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount / 100);
+  function formatCurrency(pence: number): string {
+    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(pence / 100);
   }
 
   function daysUntil(dateStr: string | null): number {
     if (!dateStr) return 0;
-    const target = new Date(dateStr);
-    const now = new Date();
-    return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
   }
 
-  function contingencyColor(pct: number): string {
-    if (pct > 10) return 'bg-green-500';
-    if (pct >= 5) return 'bg-amber-500';
-    return 'bg-red-500';
-  }
-
-  function statusDotColor(status: string): string {
+  function statusDot(status: string): string {
     switch (status) {
       case 'done': return 'bg-green-500';
       case 'in_progress': return 'bg-amber-500';
@@ -165,611 +75,262 @@
     }
   }
 
-  function alertBorderColor(priority: string): string {
-    switch (priority) {
-      case 'critical': return 'border-l-red-500';
-      case 'warning': return 'border-l-amber-500';
-      default: return 'border-l-blue-500';
-    }
-  }
-
-  function priorityBadgeClasses(priority: string): string {
-    switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400';
-      case 'high': return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
-      case 'medium': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400';
-      default: return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
-    }
-  }
-
-  function leadTimeBadgeClasses(leadTime: string): string {
-    // Parse the first number to determine urgency
-    const match = leadTime.match(/(\d+)/);
-    const weeks = match ? parseInt(match[1]) : 0;
-    if (weeks >= 6) return 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400';
-    if (weeks >= 3) return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
-    return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
-  }
-
   const circumference = 2 * Math.PI * 45;
-
-  let spentPct = $derived(data.budget ? Math.round((data.budget.spent / Math.max(data.budget.total, 1)) * 100) : 0);
-  let committedPct = $derived(data.budget ? Math.round((data.budget.committed / Math.max(data.budget.total, 1)) * 100) : 0);
-  let remainingPct = $derived(Math.max(0, 100 - spentPct - committedPct));
 </script>
 
-<style>
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-in {
-    animation: fadeInUp 0.4s ease-out both;
-  }
-
-  .animate-in-delay-1 {
-    animation: fadeInUp 0.4s ease-out 0.05s both;
-  }
-
-  .animate-in-delay-2 {
-    animation: fadeInUp 0.4s ease-out 0.1s both;
-  }
-
-  .animate-in-delay-3 {
-    animation: fadeInUp 0.4s ease-out 0.15s both;
-  }
-
-  .progress-ring-gradient {
-    stroke: url(#progressGradient);
-  }
-</style>
-
-<div class="space-y-5">
-  <!-- Hero Section -->
-  <div class="animate-in rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 lg:p-6">
-    <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-      <!-- Left: Project Info -->
+<div class="space-y-6">
+  <!-- Hero -->
+  <div class="rounded-xl border border-zinc-200/60 bg-white p-6 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+    <div class="flex items-center justify-between gap-6">
       <div class="min-w-0 flex-1">
-        <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {data.project?.name ?? 'Little Lodge'}
-        </h1>
-        <div class="mt-1.5 flex items-center gap-1.5">
-          <MapPin size={14} class="shrink-0 text-zinc-400" />
-          <p class="text-sm text-zinc-500 dark:text-zinc-400">
-            {data.project?.address ?? 'Grange View Road, N20'}
-          </p>
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Current Phase</p>
+        <h1 class="mt-1 text-xl font-semibold text-zinc-900 dark:text-zinc-100">{currentPhase}</h1>
+        <div class="mt-1 flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+          <MapPin size={13} />
+          <span>{data.project?.address ?? 'Grange View Road, N20 9EF'}</span>
         </div>
-        {#if data.project?.startDate}
-          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Day <span class="font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">{daysIntoProject}</span> of your build
-          </p>
-        {:else}
-          <p class="mt-2 text-sm text-zinc-400 dark:text-zinc-500">Not started yet</p>
-        {/if}
 
-        {#if currentPhase}
-          <div class="mt-1">
-            <span class="inline-flex items-center rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-600 dark:bg-accent-950/40 dark:text-accent-400">
-              {currentPhase}
-            </span>
-          </div>
-        {/if}
+        <!-- Phase bar -->
+        <div class="mt-5 flex gap-1" title="Build progress">
+          {#each phaseSegments as segment, i}
+            {@const segmentProgress = (i / phaseSegments.length) * 100}
+            <div
+              class="h-2 flex-1 rounded-sm transition-colors duration-500 {progress > segmentProgress ? 'bg-indigo-500' : 'bg-zinc-200 dark:bg-zinc-700'}"
+              title="{segment.name}: {segment.label}"
+            ></div>
+          {/each}
+        </div>
+        <div class="mt-1.5 flex justify-between text-[10px] text-zinc-400">
+          <span>A</span>
+          <span>K</span>
+        </div>
       </div>
 
-      <!-- Right: Progress Ring -->
-      <div class="flex flex-col items-center gap-1.5">
-        <svg viewBox="0 0 100 100" class="h-24 w-24 sm:h-28 sm:w-28">
-          <defs>
-            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color: oklch(0.673 0.182 276.935)" />
-              <stop offset="100%" style="stop-color: oklch(0.511 0.262 276.966)" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="50" cy="50" r="45"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="6"
-            class="text-zinc-100 dark:text-zinc-800"
-          />
-          <circle
-            cx="50" cy="50" r="45"
-            fill="none"
-            stroke-width="6"
-            class="progress-ring-gradient"
+      <!-- Progress ring -->
+      <div class="flex shrink-0 flex-col items-center">
+        <svg viewBox="0 0 100 100" class="h-20 w-20">
+          <circle cx="50" cy="50" r="45" fill="none" stroke-width="7" class="stroke-zinc-200 dark:stroke-zinc-700" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke-width="7"
+            class="stroke-indigo-500"
             stroke-dasharray={circumference}
             stroke-dashoffset={circumference * (1 - progress / 100)}
             stroke-linecap="round"
             transform="rotate(-90 50 50)"
-            style="transition: stroke-dashoffset 0.6s ease-out;"
+            style="transition: stroke-dashoffset 1s ease-out"
           />
-          <text
-            x="50" y="46"
-            text-anchor="middle"
-            dominant-baseline="central"
-            class="fill-zinc-900 text-2xl font-semibold dark:fill-zinc-100"
-          >{progress}%</text>
-          <text
-            x="50" y="62"
-            text-anchor="middle"
-            dominant-baseline="central"
-            class="fill-zinc-400 dark:fill-zinc-500"
-            style="font-size: 9px"
-          >complete</text>
+          <text x="50" y="48" text-anchor="middle" dominant-baseline="central" class="fill-zinc-900 dark:fill-zinc-100 text-lg font-semibold">{progress}%</text>
+          <text x="50" y="63" text-anchor="middle" class="fill-zinc-400 text-[8px]">complete</text>
         </svg>
       </div>
     </div>
+  </div>
 
-    <!-- Segmented Phase Bar -->
-    <div class="mt-5">
-      <div class="flex gap-0.5" title="Overall build progress">
-        {#each phaseSegments as segment, i}
-          {@const threshold = phaseSegments.slice(0, i + 1).reduce((s, p) => s + p.pct, 0)}
-          {@const prevThreshold = phaseSegments.slice(0, i).reduce((s, p) => s + p.pct, 0)}
-          {@const filled = progress >= threshold}
-          {@const partial = !filled && progress > prevThreshold}
-          <div
-            class="group relative h-2 flex-1 rounded-sm transition-colors duration-300 first:rounded-l-md last:rounded-r-md {filled ? 'bg-accent-500' : partial ? 'bg-accent-300 dark:bg-accent-700' : 'bg-zinc-200 dark:bg-zinc-700/50'}"
-          >
-            <!-- Tooltip -->
-            <div class="pointer-events-none absolute -top-9 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-2 py-1 text-[10px] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-zinc-700">
-              {segment.name}: {segment.label}
+  <!-- Three-column grid -->
+  <div class="grid gap-5 lg:grid-cols-3">
+    <!-- Milestones -->
+    <a href="/timeline" class="group rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Next Milestones</p>
+        <span class="text-xs text-indigo-500 opacity-0 transition-opacity group-hover:opacity-100">View all</span>
+      </div>
+      {#if data.milestones.length > 0}
+        <div class="space-y-3">
+          {#each data.milestones.slice(0, 3) as milestone}
+            <div class="flex items-start gap-3">
+              <Diamond size={14} class="mt-0.5 shrink-0 text-indigo-400" />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">{milestone.title}</p>
+                {#if milestone.dueDate}
+                  {@const days = daysUntil(milestone.dueDate)}
+                  <p class="text-xs {days < 0 ? 'text-red-500' : 'text-zinc-400'}">{days < 0 ? `${Math.abs(days)}d overdue` : `${days}d`}</p>
+                {/if}
+              </div>
             </div>
+          {/each}
+        </div>
+      {:else}
+        <div class="flex flex-col items-center py-6 text-center">
+          <Diamond size={24} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <p class="text-sm text-zinc-400">No milestones set</p>
+        </div>
+      {/if}
+    </a>
+
+    <!-- Budget -->
+    <a href="/budget" class="group rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Budget</p>
+        <span class="text-xs text-indigo-500 opacity-0 transition-opacity group-hover:opacity-100">Details</span>
+      </div>
+      {#if data.budget}
+        <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+          <div>
+            <p class="text-[10px] uppercase text-zinc-400">Total</p>
+            <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{formatCurrency(data.budget.total)}</p>
           </div>
-        {/each}
+          <div>
+            <p class="text-[10px] uppercase text-zinc-400">Spent</p>
+            <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{formatCurrency(data.budget.spent)}</p>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase text-zinc-400">Committed</p>
+            <p class="text-sm font-medium tabular-nums text-amber-600 dark:text-amber-400">{formatCurrency(data.budget.committed)}</p>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase text-zinc-400">Remaining</p>
+            <p class="text-sm font-medium tabular-nums text-green-600 dark:text-green-400">{formatCurrency(data.budget.remaining)}</p>
+          </div>
+        </div>
+        <!-- Contingency -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="uppercase text-zinc-400">Contingency</span>
+            <span class="font-medium {data.budget.contingencyPct > 10 ? 'text-green-600' : data.budget.contingencyPct >= 5 ? 'text-amber-600' : 'text-red-600'}">{data.budget.contingencyPct}% remaining</span>
+          </div>
+          <div class="mt-1 h-1.5 w-full rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <div class="h-1.5 rounded-full transition-all duration-500 {data.budget.contingencyPct > 10 ? 'bg-green-500' : data.budget.contingencyPct >= 5 ? 'bg-amber-500' : 'bg-red-500'}" style="width: {Math.min(data.budget.contingencyPct, 100)}%"></div>
+          </div>
+        </div>
+      {:else}
+        <div class="flex flex-col items-center py-6 text-center">
+          <Wallet size={24} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <p class="text-sm text-zinc-400">Budget not configured</p>
+        </div>
+      {/if}
+    </a>
+
+    <!-- Alerts -->
+    <div class="rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Alerts</p>
       </div>
-      <div class="mt-1.5 flex justify-between text-[10px] text-zinc-400">
-        {#each phaseSegments as segment}
-          <span class="w-0 text-center">{segment.name}</span>
-        {/each}
-      </div>
+      {#if data.alerts.length > 0}
+        <div class="space-y-2.5 max-h-48 overflow-y-auto">
+          {#each data.alerts.slice(0, 5) as alert}
+            <a href={alert.link} class="flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+              <span class="mt-1 h-2 w-2 shrink-0 rounded-full {alert.priority === 'critical' ? 'bg-red-500' : alert.priority === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}"></span>
+              <p class="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">{alert.title}</p>
+            </a>
+          {/each}
+        </div>
+      {:else}
+        <div class="flex flex-col items-center py-6 text-center">
+          <CircleCheck size={24} class="mb-2 text-green-300 dark:text-green-700" />
+          <p class="text-sm text-zinc-400">All clear</p>
+        </div>
+      {/if}
     </div>
   </div>
 
-  <!-- Focus Now removed from here - moved to Column 3 -->
-
-
-  <!-- Three-Column Grid -->
+  <!-- Second row -->
   <div class="grid gap-5 lg:grid-cols-3">
-    <!-- Column 1: Schedule + Phase Guide -->
-    <div class="space-y-5">
-      <!-- Phase Guide -->
-      {#if data.phaseGuidance}
-        <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-          <div class="mb-4 flex items-center gap-2.5">
-            <Compass size={16} class="text-accent-500" />
-            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Phase Guide</p>
-          </div>
-
-          {#if currentPhase}
-            <p class="mb-3 text-xs font-medium text-accent-600 dark:text-accent-400">{currentPhase}</p>
-          {/if}
-
-          <p class="mb-4 text-sm italic text-zinc-500 dark:text-zinc-400 leading-relaxed">
-            {data.phaseGuidance.summary}
-          </p>
-
-          <!-- What to focus on -->
-          <div class="mb-4">
-            <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">What to focus on</p>
-            <ul class="space-y-1.5">
-              {#each data.phaseGuidance.whatToFocus as item}
-                <li class="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400"></span>
-                  {item}
-                </li>
-              {/each}
-            </ul>
-          </div>
-
-          <!-- Rotating tip -->
-          {#if rotatingTip}
-            <div class="mb-4 rounded-lg bg-amber-50/70 px-3.5 py-3 dark:bg-amber-950/20">
-              <div class="flex items-start gap-2">
-                <Lightbulb size={14} class="mt-0.5 shrink-0 text-amber-500" />
-                <p class="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                  {rotatingTip.content}
-                </p>
-              </div>
-            </div>
-          {/if}
-
-          <!-- Common mistakes (collapsible) -->
-          {#if data.phaseGuidance.commonMistakes.length > 0}
-            <div class="mb-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-              <button
-                class="flex w-full items-center justify-between text-left"
-                onclick={() => (mistakesExpanded = !mistakesExpanded)}
-              >
-                <span class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  <OctagonAlert size={12} />
-                  Common mistakes
-                </span>
-                {#if mistakesExpanded}
-                  <ChevronUp size={14} class="text-zinc-400" />
-                {:else}
-                  <ChevronDown size={14} class="text-zinc-400" />
-                {/if}
-              </button>
-              {#if mistakesExpanded}
-                <ul class="mt-2.5 space-y-2">
-                  {#each data.phaseGuidance.commonMistakes as mistake}
-                    <li class="flex items-start gap-2 text-sm text-red-700 dark:text-red-400">
-                      <CircleAlert size={12} class="mt-1 shrink-0" />
-                      <span class="leading-relaxed">{mistake}</span>
-                    </li>
-                  {/each}
-                </ul>
+    <!-- This Week -->
+    <a href="/timeline" class="group rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">This Week</p>
+        <span class="text-xs text-indigo-500 opacity-0 transition-opacity group-hover:opacity-100">View all</span>
+      </div>
+      {#if data.recentTasks.length > 0}
+        <div class="space-y-2">
+          {#each data.recentTasks.slice(0, 4) as task}
+            <div class="flex items-center gap-3">
+              <span class="h-2 w-2 shrink-0 rounded-full {statusDot(task.status)}"></span>
+              <span class="flex-1 truncate text-sm text-zinc-700 dark:text-zinc-300">{task.title}</span>
+              {#if task.dueDate}
+                <span class="shrink-0 text-[11px] tabular-nums text-zinc-400">{new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
               {/if}
             </div>
-          {/if}
-
-          <!-- Key decisions for this phase -->
-          {#if data.phaseGuidance.keyDecisions.length > 0}
-            <div class="border-t border-zinc-100 pt-3 dark:border-zinc-800">
-              <p class="mb-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Key decisions</p>
-              <div class="space-y-2.5">
-                {#each data.phaseGuidance.keyDecisions as decision}
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{decision.title}</p>
-                      <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">{decision.why}</p>
-                    </div>
-                    <span class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium {leadTimeBadgeClasses(decision.leadTime)}">
-                      {decision.leadTime}
-                    </span>
-                  </div>
-                {/each}
-              </div>
-            </div>
-          {/if}
+          {/each}
+        </div>
+      {:else}
+        <div class="flex flex-col items-center py-6 text-center">
+          <CalendarDays size={24} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <p class="text-sm text-zinc-400">No tasks this week</p>
         </div>
       {/if}
+    </a>
 
-      <!-- This Week -->
-      <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-4 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">This Week</p>
-          <a href="/timeline" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">View all</a>
-        </div>
-        {#if data.recentTasks.length > 0}
-          <div class="space-y-1">
-            {#each data.recentTasks.slice(0, 5) as task}
-              <a href="/timeline" class="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                <span class="h-2 w-2 shrink-0 rounded-full {statusDotColor(task.status)}"></span>
-                <span class="min-w-0 flex-1 truncate text-sm text-zinc-700 dark:text-zinc-300">{task.title}</span>
-                {#if task.dueDate}
-                  <span class="shrink-0 text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
-                    {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                  </span>
-                {/if}
-              </a>
-            {/each}
-          </div>
-        {:else}
-          <div class="flex flex-col items-center justify-center py-8 text-center">
-            <CalendarDays size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
-            <p class="text-sm text-zinc-500 dark:text-zinc-400">No tasks this week</p>
-            <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Upcoming tasks will show here</p>
-          </div>
-        {/if}
+    <!-- VAT Reclaimable -->
+    <a href="/vat" class="group rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">VAT Reclaimable</p>
+        <span class="text-xs text-indigo-500 opacity-0 transition-opacity group-hover:opacity-100">Details</span>
       </div>
-
-      <!-- Milestones -->
-      <div class="animate-in-delay-2 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-4 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Milestones</p>
-          <a href="/timeline" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">View all</a>
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/30">
+          <Receipt size={20} class="text-green-600 dark:text-green-400" />
         </div>
-        {#if data.milestones.length > 0}
-          <div class="space-y-3">
-            {#each data.milestones.slice(0, 3) as milestone}
-              <a href="/timeline" class="flex items-start gap-3 rounded-lg p-2 transition-colors duration-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                <Diamond size={14} class="mt-0.5 shrink-0 text-accent-500" />
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{milestone.title}</p>
-                  {#if milestone.dueDate}
-                    {@const days = daysUntil(milestone.dueDate)}
-                    <p class="mt-0.5 text-xs tabular-nums {days < 0 ? 'text-red-500' : days <= 7 ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'}">
-                      {days < 0 ? `${Math.abs(days)} days overdue` : days === 0 ? 'Today' : `${days} days remaining`}
-                    </p>
-                  {/if}
-                </div>
-              </a>
-            {/each}
-          </div>
-        {:else}
-          <div class="flex flex-col items-center justify-center py-8 text-center">
-            <Diamond size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
-            <p class="text-sm text-zinc-500 dark:text-zinc-400">No milestones set</p>
-            <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Key milestones will appear here</p>
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Column 2: Money -->
-    <div class="space-y-5">
-      <!-- Budget -->
-      <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-4 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Budget</p>
-          <a href="/budget" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">Details</a>
-        </div>
-        {#if data.budget}
-          <p class="text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-            {formatCurrency(data.budget.total)}
-          </p>
-          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Total budget</p>
-
-          <!-- Stacked horizontal bar -->
-          <div class="mt-4 flex h-3 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-            {#if spentPct > 0}
-              <div
-                class="h-full bg-accent-500 transition-all duration-500"
-                style="width: {spentPct}%"
-                title="Spent: {formatCurrency(data.budget.spent)}"
-              ></div>
-            {/if}
-            {#if committedPct > 0}
-              <div
-                class="h-full bg-amber-400 transition-all duration-500"
-                style="width: {committedPct}%"
-                title="Committed: {formatCurrency(data.budget.committed)}"
-              ></div>
-            {/if}
-          </div>
-
-          <!-- Legend + stats -->
-          <div class="mt-3 grid grid-cols-3 gap-3">
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="h-2 w-2 rounded-full bg-accent-500"></span>
-                <span class="text-[10px] text-zinc-400">Spent</span>
-              </div>
-              <p class="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{formatCurrency(data.budget.spent)}</p>
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-                <span class="text-[10px] text-zinc-400">Committed</span>
-              </div>
-              <p class="mt-0.5 text-sm font-semibold tabular-nums text-amber-600 dark:text-amber-400">{formatCurrency(data.budget.committed)}</p>
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="h-2 w-2 rounded-full bg-zinc-200 dark:bg-zinc-700"></span>
-                <span class="text-[10px] text-zinc-400">Remaining</span>
-              </div>
-              <p class="mt-0.5 text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">{formatCurrency(data.budget.remaining)}</p>
-            </div>
-          </div>
-        {:else}
-          <p class="text-2xl font-semibold text-zinc-200 dark:text-zinc-700">--</p>
-          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Total budget</p>
-          <div class="mt-4 h-3 w-full rounded-full bg-zinc-100 dark:bg-zinc-800"></div>
-          <div class="mt-3 grid grid-cols-3 gap-3">
-            <div>
-              <p class="text-[10px] text-zinc-400">Spent</p>
-              <p class="mt-0.5 text-sm font-semibold text-zinc-200 dark:text-zinc-700">--</p>
-            </div>
-            <div>
-              <p class="text-[10px] text-zinc-400">Committed</p>
-              <p class="mt-0.5 text-sm font-semibold text-zinc-200 dark:text-zinc-700">--</p>
-            </div>
-            <div>
-              <p class="text-[10px] text-zinc-400">Remaining</p>
-              <p class="mt-0.5 text-sm font-semibold text-zinc-200 dark:text-zinc-700">--</p>
-            </div>
-          </div>
-        {/if}
-      </div>
-
-      <!-- Contingency mini card -->
-      <div class="animate-in-delay-2 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Contingency</p>
-          {#if data.budget}
-            <span class="text-xs font-medium tabular-nums {data.budget.contingencyPct > 10 ? 'text-green-600 dark:text-green-400' : data.budget.contingencyPct >= 5 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}">
-              {data.budget.contingencyPct}% remaining
-            </span>
-          {:else}
-            <span class="text-xs text-zinc-400 dark:text-zinc-500">--</span>
-          {/if}
-        </div>
-        <div class="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-          {#if data.budget}
-            <div
-              class="h-full rounded-full transition-all duration-500 {contingencyColor(data.budget.contingencyPct)}"
-              style="width: {Math.min(data.budget.contingencyPct, 100)}%"
-            ></div>
-          {/if}
+        <div>
+          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.vatTotal ? formatCurrency(data.vatTotal) : '£0'}</p>
+          <p class="text-xs text-zinc-400">Via DIY Housebuilders scheme</p>
         </div>
       </div>
+    </a>
 
-      <!-- VAT Reclaimable mini card -->
-      <div class="animate-in-delay-3 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-3 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">VAT Reclaimable</p>
-          <a href="/vat" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">Details</a>
-        </div>
+    <!-- Upcoming Decisions -->
+    <a href="/decisions" class="group rounded-xl border border-zinc-200/60 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Decisions</p>
+        <span class="text-xs text-indigo-500 opacity-0 transition-opacity group-hover:opacity-100">View all</span>
+      </div>
+      {#if data.decisionCount > 0}
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/30">
-            <Receipt size={20} class="text-green-600 dark:text-green-400" />
-          </div>
-          <div>
-            <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-              {data.vatTotal ? formatCurrency(data.vatTotal) : '--'}
-            </p>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500">DIY Housebuilders scheme</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Column 3: Actions -->
-    <div class="space-y-5">
-      <!-- Focus Now (compact) -->
-      {#if primaryAction}
-        <div class="animate-in rounded-xl border border-zinc-200/50 bg-white p-4 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900" style="border-left: 3px solid {hasCriticalActions ? 'rgb(239 68 68)' : 'rgb(99 102 241)'};">
-          <p class="mb-2 text-[11px] uppercase tracking-wider font-medium {hasCriticalActions ? 'text-red-500' : 'text-accent-500'}">Focus Now</p>
-          <a href={primaryAction.link} class="group block">
-            <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">{primaryAction.title}</p>
-            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">{primaryAction.guidance}</p>
-          </a>
-          {#if secondaryActions.length > 0}
-            <div class="mt-3 space-y-1.5">
-              {#each secondaryActions as action}
-                <a href={action.link} class="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors">
-                  <span class="h-1.5 w-1.5 rounded-full shrink-0 {action.priority === 'critical' ? 'bg-red-500' : action.priority === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}"></span>
-                  <span class="truncate">{action.title}</span>
-                </a>
-              {/each}
-            </div>
-          {/if}
-        </div>
-      {/if}
-
-      <!-- Decisions -->
-      <div class="animate-in-delay-1 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-3 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Decisions</p>
-          <a href="/decisions" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">View all</a>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-50 dark:bg-accent-950/30">
-            <GitBranch size={20} class="text-accent-600 dark:text-accent-400" />
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/30">
+            <GitBranch size={20} class="text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
             <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.decisionCount}</p>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500">Pending decisions</p>
-          </div>
-          <a href="/decisions" class="ml-auto">
-            <ArrowRight size={16} class="text-zinc-300 transition-transform duration-200 hover:translate-x-0.5 dark:text-zinc-600" />
-          </a>
-        </div>
-      </div>
-
-      <!-- Planning -->
-      <div class="animate-in-delay-2 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <div class="mb-3 flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Planning</p>
-          <a href="/planning" class="text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors duration-200">View all</a>
-        </div>
-        <div class="space-y-3">
-          <!-- Conditions -->
-          <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
-              <Shield size={20} class="text-amber-600 dark:text-amber-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Conditions</p>
-              <p class="text-xs text-zinc-400 dark:text-zinc-500">
-                {data.conditionCount} undischarged
-              </p>
-            </div>
-          </div>
-          <!-- CIL -->
-          <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
-              <Landmark size={20} class="text-blue-600 dark:text-blue-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">CIL</p>
-              <p class="text-xs text-zinc-400 dark:text-zinc-500">Self-build exemption</p>
-            </div>
+            <p class="text-xs text-zinc-400">Pending decisions</p>
           </div>
         </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="animate-in-delay-3 rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
-        <p class="mb-3 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Quick Actions</p>
-        <div class="space-y-2">
-          <a
-            href="/budget"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
-          >
-            <div class="flex h-8 w-8 items-center justify-center rounded-md bg-accent-50 dark:bg-accent-950/30">
-              <PoundSterling size={16} class="text-accent-600 dark:text-accent-400" />
-            </div>
-            Log Expense
-          </a>
-          <a
-            href="/diary"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
-          >
-            <div class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950/30">
-              <BookOpen size={16} class="text-blue-600 dark:text-blue-400" />
-            </div>
-            Diary Entry
-          </a>
-          <a
-            href="/snags"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
-          >
-            <div class="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 dark:bg-red-950/30">
-              <Bug size={16} class="text-red-600 dark:text-red-400" />
-            </div>
-            Report Snag
-          </a>
+      {:else}
+        <div class="flex flex-col items-center py-6 text-center">
+          <GitBranch size={24} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <p class="text-sm text-zinc-400">No pending decisions</p>
         </div>
-      </div>
-    </div>
+      {/if}
+    </a>
   </div>
 
-  <!-- Bottom Row: Quick Stats -->
-  <div class="grid gap-5 sm:grid-cols-3 animate-in-delay-3">
-    <a href="/snags" class="group rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-colors duration-200 hover:bg-zinc-50 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/30">
-            <AlertTriangle size={18} class="text-red-600 dark:text-red-400" />
-          </div>
-          <div>
-            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Open Snags</p>
-            <p class="text-xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.snagCount}</p>
-          </div>
+  <!-- Bottom stats -->
+  <div class="grid gap-4 sm:grid-cols-3">
+    <a href="/snags" class="group flex items-center justify-between rounded-xl border border-zinc-200/60 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/30">
+          <AlertTriangle size={16} class="text-red-500" />
         </div>
-        <ArrowRight size={16} class="text-zinc-300 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-600" />
+        <div>
+          <p class="text-xs text-zinc-400">Open Snags</p>
+          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.snagCount}</p>
+        </div>
       </div>
+      <ArrowRight size={14} class="text-zinc-200 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-700" />
     </a>
 
-    <a href="/decisions" class="group rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-colors duration-200 hover:bg-zinc-50 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-50 dark:bg-accent-950/30">
-            <GitBranch size={18} class="text-accent-600 dark:text-accent-400" />
-          </div>
-          <div>
-            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Decisions</p>
-            <p class="text-xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.decisionCount}</p>
-          </div>
+    <a href="/planning" class="group flex items-center justify-between rounded-xl border border-zinc-200/60 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
+          <Shield size={16} class="text-amber-500" />
         </div>
-        <ArrowRight size={16} class="text-zinc-300 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-600" />
+        <div>
+          <p class="text-xs text-zinc-400">Conditions</p>
+          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.conditionCount}</p>
+        </div>
       </div>
+      <ArrowRight size={14} class="text-zinc-200 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-700" />
     </a>
 
-    <a href="/planning" class="group rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-colors duration-200 hover:bg-zinc-50 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
-            <Shield size={18} class="text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Conditions</p>
-            <p class="text-xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.conditionCount}</p>
-          </div>
+    <a href="/inspections" class="group flex items-center justify-between rounded-xl border border-zinc-200/60 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
+          <ClipboardCheck size={16} class="text-blue-500" />
         </div>
-        <ArrowRight size={16} class="text-zinc-300 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-600" />
+        <div>
+          <p class="text-xs text-zinc-400">Inspections</p>
+          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">17</p>
+        </div>
       </div>
+      <ArrowRight size={14} class="text-zinc-200 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-zinc-700" />
     </a>
   </div>
 </div>
