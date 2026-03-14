@@ -2,22 +2,21 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-
+export const load: PageServerLoad = async ({ params }) => {
   try {
     const api = createApiClient();
     const [entry, photos] = await Promise.all([
-      api.get(`/api/v1/projects/PROJECT_ID/diary/${params.date}`).catch(() => null),
-      api.get(`/api/v1/projects/PROJECT_ID/diary/${params.date}/photos`).catch(() => []),
+      api.get(`/diary/${params.date}`).catch(() => null),
+      api.get(`/diary/${params.date}/photos`).catch(() => []),
     ]);
+    return { entry, photos, date: params.date };
   } catch {
     return { entry: null, photos: [], date: params.date };
   }
 };
 
 export const actions: Actions = {
-  update: async ({ params, request, locals }) => {
-
+  update: async ({ params, request }) => {
     const formData = await request.formData();
     const weather = formData.get('weather') as string | null;
     const progress = formData.get('progress') as string | null;
@@ -34,7 +33,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/diary/${params.date}`, {
+      await api.patch(`/diary/${params.date}`, {
         weather: weather || null,
         workersOnSite: workers,
         progress: progress || null,

@@ -3,13 +3,13 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-
   try {
     const api = createApiClient();
     const [documents, requiredDocs] = await Promise.all([
-      api.get('/api/v1/projects/PROJECT_ID/documents').catch(() => []),
-      api.get('/api/v1/projects/PROJECT_ID/documents/required').catch(() => []),
+      api.get('/documents').catch(() => []),
+      api.get('/documents/required').catch(() => []),
     ]);
+    return { documents, requiredDocs };
   } catch {
     return { documents: [], requiredDocs: [] };
   }
@@ -17,7 +17,6 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   upload: async ({ request }) => {
-
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const folder = formData.get('folder') as string;
@@ -30,7 +29,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.uploadFile('/api/v1/projects/PROJECT_ID/documents', file, {
+      await api.uploadFile('/documents', file, {
         folder: folder || 'Other',
         tags: tags || '',
         name: name || file.name,

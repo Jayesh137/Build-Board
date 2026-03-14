@@ -3,11 +3,11 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
+  return {};
 };
 
 export const actions: Actions = {
   default: async ({ request }) => {
-
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const room = formData.get('room') as string | null;
@@ -20,7 +20,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      const result = await api.post<{ id: string }>('/api/v1/projects/PROJECT_ID/snags', {
+      const result = await api.post<{ id: string }>('/snags', {
         title,
         room: room || null,
         severity: severity || 'minor',
@@ -32,3 +32,4 @@ export const actions: Actions = {
       return fail(500, { error: 'Failed to create snag' });
     }
   },
+};

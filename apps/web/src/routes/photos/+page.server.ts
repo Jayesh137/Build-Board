@@ -2,8 +2,7 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ url, locals }) => {
-
+export const load: PageServerLoad = async ({ url }) => {
   const room = url.searchParams.get('room') || '';
   const phase = url.searchParams.get('phase') || '';
   const trade = url.searchParams.get('trade') || '';
@@ -19,14 +18,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     const qs = params.toString();
 
     const [photos, filters] = await Promise.all([
-      api.get(`/api/v1/projects/PROJECT_ID/photos${qs ? `?${qs}` : ''}`).catch(() => []),
-      api.get('/api/v1/projects/PROJECT_ID/photos/filters').catch(() => ({
+      api.get(`/photos${qs ? `?${qs}` : ''}`).catch(() => []),
+      api.get('/photos/filters').catch(() => ({
         rooms: [],
         phases: [],
         trades: [],
         types: [],
       })),
     ]);
+    return { photos, filters };
   } catch {
     return { photos: [], filters: { rooms: [], phases: [], trades: [], types: [] } };
   }
@@ -34,7 +34,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 export const actions: Actions = {
   upload: async ({ request }) => {
-
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const room = formData.get('room') as string | null;
@@ -48,7 +47,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.uploadFile('/api/v1/projects/PROJECT_ID/photos', file, {
+      await api.uploadFile('/photos', file, {
         room: room || '',
         caption: caption || '',
         phase: phase || '',

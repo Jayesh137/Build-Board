@@ -3,10 +3,10 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-
   try {
     const api = createApiClient();
-    const categories = await api.get('/api/v1/projects/PROJECT_ID/budget/categories');
+    const categories = await api.get<any[]>('/budget/categories');
+    return { categories };
   } catch {
     return { categories: [] };
   }
@@ -14,7 +14,6 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   default: async ({ request }) => {
-
     const formData = await request.formData();
     const categoryId = formData.get('categoryId') as string;
     const type = formData.get('type') as string;
@@ -38,7 +37,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.post('/api/v1/projects/PROJECT_ID/budget/entries', {
+      await api.post('/budget/entries', {
         categoryId,
         type,
         supplier: supplier || null,
@@ -55,3 +54,4 @@ export const actions: Actions = {
 
     throw redirect(303, '/budget/entries');
   },
+};

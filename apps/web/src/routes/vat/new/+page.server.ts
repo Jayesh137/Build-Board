@@ -3,12 +3,11 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-
+  return {};
 };
 
 export const actions: Actions = {
   default: async ({ request }) => {
-
     const formData = await request.formData();
     const supplierName = formData.get('supplierName') as string;
     const invoiceNumber = formData.get('invoiceNumber') as string | null;
@@ -32,7 +31,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      const result = await api.post('/api/v1/projects/PROJECT_ID/vat/entries', {
+      await api.post('/vat/entries', {
         supplierName,
         invoiceNumber: invoiceNumber || null,
         description,
@@ -46,5 +45,7 @@ export const actions: Actions = {
     } catch {
       return fail(500, { error: 'Failed to create VAT entry' });
     }
+
+    throw redirect(303, '/vat');
   },
 };

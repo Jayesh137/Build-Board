@@ -2,23 +2,22 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-
+export const load: PageServerLoad = async ({ params }) => {
   try {
     const api = createApiClient();
     const [snag, photos, timeline] = await Promise.all([
-      api.get(`/api/v1/projects/PROJECT_ID/snags/${params.id}`).catch(() => null),
-      api.get(`/api/v1/projects/PROJECT_ID/snags/${params.id}/photos`).catch(() => []),
-      api.get(`/api/v1/projects/PROJECT_ID/snags/${params.id}/timeline`).catch(() => []),
+      api.get(`/snags/${params.id}`).catch(() => null),
+      api.get(`/snags/${params.id}/photos`).catch(() => []),
+      api.get(`/snags/${params.id}/timeline`).catch(() => []),
     ]);
+    return { snag, photos, timeline };
   } catch {
     return { snag: null, photos: [], timeline: [] };
   }
 };
 
 export const actions: Actions = {
-  update: async ({ params, request, locals }) => {
-
+  update: async ({ params, request }) => {
     const formData = await request.formData();
     const status = formData.get('status') as string | null;
     const resolutionNotes = formData.get('resolutionNotes') as string | null;
@@ -28,6 +27,7 @@ export const actions: Actions = {
     const room = formData.get('room') as string | null;
     const severity = formData.get('severity') as string | null;
 
+    const updates: Record<string, unknown> = {};
     if (status) updates.status = status;
     if (resolutionNotes !== null) updates.resolutionNotes = resolutionNotes || null;
     if (contractor !== null) updates.contractor = contractor || null;
@@ -38,21 +38,20 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/snags/${params.id}`, updates);
+      await api.patch(`/snags/${params.id}`, updates);
       return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update snag' });
     }
   },
 
-  markFixed: async ({ params, request, locals }) => {
-
+  markFixed: async ({ params, request }) => {
     const formData = await request.formData();
     const resolutionNotes = formData.get('resolutionNotes') as string | null;
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/snags/${params.id}`, {
+      await api.patch(`/snags/${params.id}`, {
         status: 'fixed',
         resolutionNotes: resolutionNotes || null,
       });
@@ -61,11 +60,10 @@ export const actions: Actions = {
     }
   },
 
-  verify: async ({ params, locals }) => {
-
+  verify: async ({ params }) => {
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/snags/${params.id}`, {
+      await api.patch(`/snags/${params.id}`, {
         status: 'verified',
       });
     } catch {

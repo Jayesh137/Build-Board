@@ -2,22 +2,21 @@ import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-
+export const load: PageServerLoad = async ({ params }) => {
   try {
     const api = createApiClient();
     const [decision, options] = await Promise.all([
-      api.get(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`).catch(() => null),
-      api.get(`/api/v1/projects/PROJECT_ID/decisions/${params.id}/options`).catch(() => []),
+      api.get(`/decisions/${params.id}`).catch(() => null),
+      api.get(`/decisions/${params.id}/options`).catch(() => []),
     ]);
+    return { decision, options };
   } catch {
     return { decision: null, options: [] };
   }
 };
 
 export const actions: Actions = {
-  update: async ({ params, request, locals }) => {
-
+  update: async ({ params, request }) => {
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const category = formData.get('category') as string | null;
@@ -28,7 +27,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`, {
+      await api.patch(`/decisions/${params.id}`, {
         title: title || undefined,
         category: category || null,
         status: status || undefined,
@@ -41,8 +40,7 @@ export const actions: Actions = {
     }
   },
 
-  addOption: async ({ params, request, locals }) => {
-
+  addOption: async ({ params, request }) => {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const supplier = formData.get('supplier') as string | null;
@@ -58,7 +56,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.post(`/api/v1/projects/PROJECT_ID/decisions/${params.id}/options`, {
+      await api.post(`/decisions/${params.id}/options`, {
         name,
         supplier: supplier || null,
         costPence: costPence ? Math.round(parseFloat(costPence) * 100) : null,
@@ -72,8 +70,7 @@ export const actions: Actions = {
     }
   },
 
-  chooseOption: async ({ params, request, locals }) => {
-
+  chooseOption: async ({ params, request }) => {
     const formData = await request.formData();
     const optionId = formData.get('optionId') as string;
 
@@ -83,7 +80,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/decisions/${params.id}`, {
+      await api.patch(`/decisions/${params.id}`, {
         chosenOptionId: optionId,
         status: 'decided',
       });

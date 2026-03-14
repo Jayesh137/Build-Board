@@ -3,10 +3,10 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-
   try {
     const api = createApiClient();
-    const phases = await api.get('/api/v1/projects/PROJECT_ID/phases?include=tasks');
+    const phases = await api.get<any[]>('/phases?include=tasks');
+    return { phases };
   } catch {
     return { phases: [] };
   }
@@ -14,7 +14,6 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   createTask: async ({ request }) => {
-
     const formData = await request.formData();
     const phaseId = formData.get('phaseId') as string;
     const title = formData.get('title') as string;
@@ -30,7 +29,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.post('/api/v1/projects/PROJECT_ID/tasks', {
+      await api.post('/tasks', {
         phaseId,
         title,
         description: description || null,
@@ -45,7 +44,6 @@ export const actions: Actions = {
   },
 
   updateTaskStatus: async ({ request }) => {
-
     const formData = await request.formData();
     const taskId = formData.get('taskId') as string;
     const status = formData.get('status') as string;
@@ -56,7 +54,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/tasks/${taskId}`, { status });
+      await api.patch(`/tasks/${taskId}`, { status });
     } catch {
       return fail(500, { error: 'Failed to update task' });
     }

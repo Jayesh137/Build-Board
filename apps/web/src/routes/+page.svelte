@@ -92,7 +92,7 @@
       currency: 'GBP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount / 100);
   }
 
   function daysUntil(dateStr: string | null): number {

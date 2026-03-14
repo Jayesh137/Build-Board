@@ -3,14 +3,14 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-
   try {
     const api = createApiClient();
     const [task, dependencies, inspection] = await Promise.all([
-      api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}`),
-      api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}/dependencies`).catch(() => []),
-      api.get(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}/inspection`).catch(() => null),
+      api.get(`/tasks/${params.taskId}`),
+      api.get(`/tasks/${params.taskId}/dependencies`).catch(() => []),
+      api.get(`/tasks/${params.taskId}/inspection`).catch(() => null),
     ]);
+    return { task, dependencies, inspection };
   } catch {
     return { task: null, dependencies: [], inspection: null };
   }
@@ -18,7 +18,6 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   update: async ({ request, params }) => {
-
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string | null;
@@ -35,7 +34,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/tasks/${params.taskId}`, {
+      await api.patch(`/tasks/${params.taskId}`, {
         title,
         description: description || null,
         status,

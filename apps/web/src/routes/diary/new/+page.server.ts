@@ -3,11 +3,11 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
+  return {};
 };
 
 export const actions: Actions = {
   default: async ({ request }) => {
-
     const formData = await request.formData();
     const date = formData.get('date') as string;
     const weather = formData.get('weather') as string | null;
@@ -30,7 +30,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.post('/api/v1/projects/PROJECT_ID/diary', {
+      await api.post('/diary', {
         date,
         weather: weather || null,
         workersOnSite: workers,
@@ -44,3 +44,4 @@ export const actions: Actions = {
 
     throw redirect(303, `/diary/${date}`);
   },
+};

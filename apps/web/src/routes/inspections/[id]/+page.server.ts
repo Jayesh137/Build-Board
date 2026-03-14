@@ -3,10 +3,10 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-
   try {
     const api = createApiClient();
-    const inspection = await api.get(`/api/v1/projects/PROJECT_ID/inspections/${params.id}`);
+    const inspection = await api.get(`/inspections/${params.id}`);
+    return { inspection };
   } catch {
     return { inspection: null };
   }
@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   update: async ({ request, params }) => {
-
     const formData = await request.formData();
     const status = formData.get('status') as string;
     const scheduledDate = formData.get('scheduledDate') as string | null;
@@ -23,7 +22,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.patch(`/api/v1/projects/PROJECT_ID/inspections/${params.id}`, {
+      await api.patch(`/inspections/${params.id}`, {
         status,
         scheduledDate: scheduledDate || null,
         inspector: inspector || null,

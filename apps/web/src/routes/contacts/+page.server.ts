@@ -3,10 +3,10 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-
   try {
     const api = createApiClient();
-    const contacts = await api.get('/api/v1/projects/PROJECT_ID/contacts');
+    const contacts = await api.get<any[]>('/contacts');
+    return { contacts };
   } catch {
     return { contacts: [] };
   }
@@ -14,7 +14,6 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   create: async ({ request }) => {
-
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const role = formData.get('role') as string | null;
@@ -34,7 +33,7 @@ export const actions: Actions = {
 
     try {
       const api = createApiClient();
-      await api.post('/api/v1/projects/PROJECT_ID/contacts', {
+      await api.post('/contacts', {
         name,
         role: role || null,
         company: company || null,
