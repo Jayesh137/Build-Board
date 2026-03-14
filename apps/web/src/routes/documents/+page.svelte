@@ -240,12 +240,11 @@
             {#each requiredDocs as doc}
               <div class="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                 {#if doc.uploaded}
-                  <div class="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+                  <div class="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 ring-2 ring-green-50 dark:bg-green-900/40 dark:ring-green-900/20">
                     <Check size={13} class="text-green-600 dark:text-green-400" />
                   </div>
                 {:else}
                   <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-zinc-200 dark:border-zinc-700">
-                    <X size={11} class="text-zinc-300 dark:text-zinc-600" />
                   </div>
                 {/if}
                 <div>
@@ -268,14 +267,14 @@
   <div class="flex gap-6">
     <!-- Folder sidebar (desktop) -->
     <nav class="hidden w-52 flex-shrink-0 lg:block">
-      <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Folders</p>
+      <p class="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Folders</p>
       <div class="space-y-0.5">
         {#each folders as folder}
           {@const count = folderCount(folder)}
           <button
             onclick={() => (selectedFolder = folder)}
-            class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors {selectedFolder === folder
-              ? 'bg-accent-50 font-semibold text-accent-700 dark:bg-accent-950/50 dark:text-accent-400'
+            class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all duration-150 {selectedFolder === folder
+              ? 'bg-accent-50 font-semibold text-accent-700 shadow-sm dark:bg-accent-950/40 dark:text-accent-400 dark:shadow-none'
               : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200'}"
           >
             <span class="flex items-center gap-2.5">

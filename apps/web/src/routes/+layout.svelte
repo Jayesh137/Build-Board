@@ -105,18 +105,18 @@
 
   <!-- Sidebar -->
   <aside
-    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-zinc-200/80 bg-white transition-all duration-200 ease-out dark:border-zinc-800/50 dark:bg-zinc-950 lg:static {sidebarCollapsed ? 'w-16' : 'w-60'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
+    class="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-zinc-200/80 bg-white transition-all duration-200 ease-out dark:border-zinc-800/60 dark:bg-zinc-950 lg:static {sidebarCollapsed ? 'w-16' : 'w-60'} {sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
   >
     <!-- Header -->
     <div class="border-b border-zinc-200/80 px-4 pb-4 pt-5 dark:border-zinc-800/50">
       {#if !sidebarCollapsed}
         <div class="flex items-start justify-between">
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] uppercase tracking-widest text-zinc-400">BuildBoard</p>
-            <p class="mt-1 text-base font-semibold text-zinc-900 dark:text-zinc-100">Little Lodge</p>
-            <div class="mt-1 flex items-center gap-1">
-              <MapPin size={12} class="shrink-0 text-zinc-400" />
-              <p class="truncate text-xs text-zinc-500 dark:text-zinc-500">Grange View Road, N20</p>
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-accent-500 dark:text-accent-400">BuildBoard</p>
+            <p class="mt-1.5 text-base font-bold text-zinc-900 dark:text-zinc-50">Little Lodge</p>
+            <div class="mt-1 flex items-center gap-1.5">
+              <MapPin size={11} class="shrink-0 text-zinc-400 dark:text-zinc-500" />
+              <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">Grange View Road, N20</p>
             </div>
           </div>
           <button
@@ -136,14 +136,14 @@
         </div>
 
         <!-- Progress bar -->
-        <div class="mt-3">
-          <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+        <div class="mt-3.5">
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800/80">
             <div
-              class="h-full rounded-full bg-accent-500 transition-all duration-500 ease-out"
+              class="h-full rounded-full bg-gradient-to-r from-accent-500 to-accent-400 transition-all duration-500 ease-out progress-glow"
               style="width: 0%"
             ></div>
           </div>
-          <p class="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">0% complete</p>
+          <p class="mt-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">0% complete</p>
         </div>
       {:else}
         <div class="flex justify-center">
@@ -172,10 +172,10 @@
           {@const active = isActive(item.href, $page.url.pathname)}
           <a
             href={item.href}
-            class="group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 ease-out
+            class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ease-out
               {active
-                ? 'border-l-[3px] border-accent-500 bg-accent-50/50 pl-[9px] font-semibold text-accent-600 dark:bg-accent-950/30 dark:text-accent-400'
-                : 'border-l-[3px] border-transparent pl-[9px] text-zinc-600 hover:translate-x-0.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}"
+                ? 'border-l-[3px] border-accent-500 bg-accent-50/60 pl-[9px] font-semibold text-accent-700 dark:bg-accent-950/40 dark:text-accent-400'
+                : 'border-l-[3px] border-transparent pl-[9px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200'}"
             onclick={() => (sidebarOpen = false)}
           >
             <item.icon size={18} class="shrink-0" />
@@ -191,19 +191,19 @@
     <div class="border-t border-zinc-200/80 px-2 py-3 dark:border-zinc-800/50">
       <a
         href="/settings"
-        class="group flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-600 transition-all duration-200 ease-out hover:translate-x-0.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-600 transition-all duration-150 ease-out hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200"
       >
         <Settings size={18} />
         {#if !sidebarCollapsed}
           <span class="flex-1">Settings</span>
-          <span class="text-[10px] text-zinc-400 dark:text-zinc-600">v1.0</span>
+          <span class="text-[9px] text-zinc-300 dark:text-zinc-700">v1.0</span>
         {/if}
       </a>
     </div>
   </aside>
 
   <!-- Main content -->
-  <main class="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900">
+  <main class="flex-1 overflow-y-auto bg-zinc-50/80 dark:bg-zinc-900">
     <!-- Mobile top bar -->
     <div class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur-sm dark:border-zinc-800/50 dark:bg-zinc-950/95 lg:hidden">
       <button

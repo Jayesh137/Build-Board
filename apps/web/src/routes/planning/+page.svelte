@@ -75,9 +75,9 @@
   // Condition type styling
   function conditionTypeClasses(type: string): string {
     switch (type) {
-      case 'pre_commencement': return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400';
-      case 'pre_occupation': return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
-      case 'ongoing': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'pre_commencement': return 'bg-red-50 text-red-700 ring-1 ring-red-200/50 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-800/30';
+      case 'pre_occupation': return 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-800/30';
+      case 'ongoing': return 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/50 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/30';
       case 'informative': return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
       default: return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
     }
@@ -127,9 +127,9 @@
   // CIL step styling
   function stepCircleBg(status: string): string {
     switch (status) {
-      case 'confirmed': return 'bg-green-500 text-white';
-      case 'submitted': return 'bg-blue-500 text-white';
-      case 'overdue': return 'bg-red-500 text-white';
+      case 'confirmed': return 'bg-green-500 text-white shadow-[0_0_0_3px_rgba(34,197,94,0.15)]';
+      case 'submitted': return 'bg-blue-500 text-white shadow-[0_0_0_3px_rgba(59,130,246,0.15)]';
+      case 'overdue': return 'bg-red-500 text-white shadow-[0_0_0_3px_rgba(239,68,68,0.15)]';
       default: return 'border-2 border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900';
     }
   }
@@ -320,13 +320,13 @@
       <!-- Commencement banner -->
       {#if cilSteps.length > 0}
         {#if !canCommence().allowed}
-          <div class="flex items-center gap-3 border-b border-red-100 bg-red-50/80 px-5 py-3.5 dark:border-red-900/30 dark:bg-red-900/10">
-            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+          <div class="flex items-center gap-3 border-b border-red-200/60 bg-gradient-to-r from-red-50 to-red-50/50 px-5 py-4 dark:border-red-900/30 dark:from-red-950/20 dark:to-red-950/10">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-red-100 ring-4 ring-red-50 dark:bg-red-900/40 dark:ring-red-950/30">
               <CircleAlert size={18} class="text-red-600 dark:text-red-400" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-red-800 dark:text-red-300">CANNOT COMMENCE WORK</p>
-              <p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{canCommence().reason}</p>
+              <p class="text-sm font-bold text-red-800 dark:text-red-300">Cannot Commence Work</p>
+              <p class="mt-0.5 text-xs text-red-600 dark:text-red-400 leading-relaxed">{canCommence().reason}</p>
             </div>
           </div>
         {:else}

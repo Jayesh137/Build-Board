@@ -91,13 +91,14 @@
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function deadlineLabel(decision: Decision): { text: string; urgent: boolean } {
-    if (!decision.deadline) return { text: '', urgent: false };
+  function deadlineLabel(decision: Decision): { text: string; urgent: boolean; color: 'red' | 'amber' | 'green' | 'neutral' } {
+    if (!decision.deadline) return { text: '', urgent: false, color: 'neutral' };
     const days = daysDiff(decision.deadline);
-    if (days < 0) return { text: `${Math.abs(days)} day${Math.abs(days) !== 1 ? 's' : ''} overdue`, urgent: true };
-    if (days === 0) return { text: 'Due today', urgent: true };
-    if (days <= 7) return { text: `Due in ${days} day${days !== 1 ? 's' : ''}`, urgent: true };
-    return { text: `Due in ${days} day${days !== 1 ? 's' : ''}`, urgent: false };
+    if (days < 0) return { text: `${Math.abs(days)} day${Math.abs(days) !== 1 ? 's' : ''} overdue`, urgent: true, color: 'red' };
+    if (days === 0) return { text: 'Due today', urgent: true, color: 'red' };
+    if (days <= 7) return { text: `Due in ${days} day${days !== 1 ? 's' : ''}`, urgent: true, color: 'amber' };
+    if (days <= 30) return { text: `Due in ${days} day${days !== 1 ? 's' : ''}`, urgent: false, color: 'neutral' };
+    return { text: `Due in ${days} days`, urgent: false, color: 'green' };
   }
 
   function statusBadgeClasses(status: string): string {
@@ -221,7 +222,7 @@
         {@const deadline = deadlineLabel(decision)}
         {@const orderUrgent = isOrderByUrgent(decision)}
         <a href="/decisions/{decision.id}" class="group block">
-          <div class="relative rounded-xl border border-l-4 border-zinc-200/50 bg-white p-5 shadow-sm transition-all duration-150 hover:shadow-md hover:border-zinc-300/60 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:border-zinc-700/60 {leftBorderColor(decision)}">
+          <div class="relative rounded-xl border border-l-4 border-zinc-200/50 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-zinc-300/60 dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] dark:hover:border-zinc-700/60 dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] {leftBorderColor(decision)}">
             <!-- Title + status -->
             <div class="flex items-start justify-between gap-3">
               <h3 class="text-[15px] font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
@@ -243,8 +244,8 @@
             <div class="mt-4 flex flex-col gap-2">
               <!-- Deadline countdown -->
               {#if deadline.text}
-                <div class="flex items-center gap-1.5 text-xs {overdue ? 'text-red-600 font-medium dark:text-red-400' : deadline.urgent ? 'text-amber-600 font-medium dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'}">
-                  <CalendarDays size={13} class={overdue ? 'text-red-500' : deadline.urgent ? 'text-amber-500' : 'text-zinc-400'} />
+                <div class="flex items-center gap-1.5 text-xs {deadline.color === 'red' ? 'text-red-600 font-medium dark:text-red-400' : deadline.color === 'amber' ? 'text-amber-600 font-medium dark:text-amber-400' : deadline.color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-zinc-500 dark:text-zinc-400'}">
+                  <CalendarDays size={13} class={deadline.color === 'red' ? 'text-red-500' : deadline.color === 'amber' ? 'text-amber-500' : deadline.color === 'green' ? 'text-green-500' : 'text-zinc-400'} />
                   {deadline.text}
                 </div>
               {/if}

@@ -198,9 +198,9 @@
 
   <!-- Phase Briefing Card -->
   {#if phaseGuidance}
-    <div class="relative rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
+    <div class="relative rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] overflow-hidden">
       <!-- Gradient left border -->
-      <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-indigo-500 to-violet-500"></div>
+      <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-indigo-500 via-violet-500 to-purple-500"></div>
 
       {#if briefingExpanded}
         <!-- Dismiss button -->
@@ -327,7 +327,7 @@
   {/if}
 
   <!-- Filter bar -->
-  <div class="rounded-xl border border-zinc-200/50 bg-white p-3 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+  <div class="rounded-xl border border-zinc-200/50 bg-white p-3 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900/80 dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)]">
     <div class="flex flex-wrap items-center gap-3">
       <div class="relative flex-1 min-w-[200px]">
         <Search size={16} class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -395,11 +395,11 @@
             <span class="flex-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               {phase.name}
             </span>
-            <span class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-              {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
+            <span class="inline-flex items-center rounded-full bg-zinc-100/80 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-zinc-500 dark:bg-zinc-800/80 dark:text-zinc-400">
+              {taskCount}
             </span>
             {#if taskCount > 0}
-              <span class="text-xs font-medium tabular-nums {progress === 100 ? 'text-green-600 dark:text-green-400' : 'text-zinc-400'}">
+              <span class="text-[11px] font-semibold tabular-nums {progress === 100 ? 'text-green-600 dark:text-green-400' : progress > 0 ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-400 dark:text-zinc-500'}">
                 {progress}%
               </span>
             {/if}

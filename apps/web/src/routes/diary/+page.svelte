@@ -165,8 +165,8 @@
       <div class="flex items-center gap-3">
         <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Site Diary</h1>
         {#if streak && streak.currentStreak > 0}
-          <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-orange-200/50 dark:ring-orange-800/50">
-            <Flame size={13} />
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/15 px-3 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-orange-200/50 dark:ring-orange-800/40">
+            <Flame size={13} class="text-orange-500" />
             {streak.currentStreak}-day streak
           </span>
         {:else}
@@ -226,7 +226,7 @@
   {/if}
 
   <!-- Calendar -->
-  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-4 lg:p-5">
+  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] p-4 lg:p-5">
     <p class="mb-4 text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Calendar</p>
 
     <!-- Month nav -->
@@ -303,7 +303,7 @@
           {@const WeatherIcon = getWeatherIcon(entry.weather)}
           <a
             href="/diary/{entry.date}"
-            class="group flex items-center gap-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-4 transition-all hover:shadow-md"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] p-4 transition-all duration-200 hover:shadow-md dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-zinc-300/60 dark:hover:border-zinc-700/60"
           >
             <!-- Weather icon -->
             <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">

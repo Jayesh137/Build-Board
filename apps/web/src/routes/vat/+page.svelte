@@ -143,16 +143,17 @@
   {/if}
 
   <!-- Summary card -->
-  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm p-5 lg:p-6">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] p-5 lg:p-6 overflow-hidden relative">
+    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-500 to-emerald-400"></div>
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pt-1">
       <!-- Reclaimable total -->
       <div class="flex items-center gap-4">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
-          <Receipt size={22} class="text-green-600 dark:text-green-400" />
+        <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20 ring-4 ring-green-50 dark:ring-green-900/10">
+          <Receipt size={24} class="text-green-600 dark:text-green-400" />
         </div>
         <div>
           <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Total Reclaimable</p>
-          <p class="mt-0.5 text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">
+          <p class="mt-1 text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">
             {summary ? formatCurrency(summary.totalReclaimable) : '\u00A30.00'}
           </p>
         </div>
@@ -285,16 +286,16 @@
   </div>
 
   <!-- Info card: What can I reclaim? -->
-  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm">
+  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)]">
     <button
       onclick={() => (rulesExpanded = !rulesExpanded)}
       class="flex w-full items-center justify-between p-4 lg:px-5 text-left transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 rounded-xl"
     >
       <div class="flex items-center gap-3">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-          <HelpCircle size={16} class="text-blue-600 dark:text-blue-400" />
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+          <HelpCircle size={16} class="text-indigo-600 dark:text-indigo-400" />
         </div>
-        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">What can I reclaim?</span>
+        <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">What can I reclaim?</span>
       </div>
       {#if rulesExpanded}
         <ChevronUp size={16} class="text-zinc-400" />

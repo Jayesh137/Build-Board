@@ -221,50 +221,54 @@
   <!-- Stats bar -->
   {#if stats}
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] overflow-hidden">
+        <div class="h-0.5 bg-red-500"></div>
         <div class="flex items-center gap-3 px-4 py-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/40">
             <CircleAlert size={18} class="text-red-500 dark:text-red-400" />
           </div>
           <div>
-            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.open}</p>
-            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Open</p>
+            <p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{stats.open}</p>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Open</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] overflow-hidden">
+        <div class="h-0.5 bg-amber-500"></div>
         <div class="flex items-center gap-3 px-4 py-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/40">
             <Clock size={18} class="text-amber-500 dark:text-amber-400" />
           </div>
           <div>
-            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.inProgress}</p>
-            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">In Progress</p>
+            <p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{stats.inProgress}</p>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">In Progress</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] overflow-hidden">
+        <div class="h-0.5 bg-green-500"></div>
         <div class="flex items-center gap-3 px-4 py-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/40">
             <CircleCheck size={18} class="text-green-500 dark:text-green-400" />
           </div>
           <div>
-            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.fixed}</p>
-            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Fixed</p>
+            <p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{stats.fixed}</p>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Fixed</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+      <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] overflow-hidden">
+        <div class="h-0.5 bg-blue-500"></div>
         <div class="flex items-center gap-3 px-4 py-3">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40">
             <ShieldCheck size={18} class="text-blue-500 dark:text-blue-400" />
           </div>
           <div>
-            <p class="text-xl font-bold text-zinc-900 dark:text-zinc-100">{stats.verified}</p>
-            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Verified</p>
+            <p class="text-xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{stats.verified}</p>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Verified</p>
           </div>
         </div>
       </div>
@@ -415,7 +419,7 @@
         {@const columnSnags = snagsByStatus(column.key)}
         <div class="w-64 flex-shrink-0">
           <!-- Column header -->
-          <div class="mb-3 flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
+          <div class="mb-3 flex items-center justify-between rounded-lg bg-zinc-50/80 px-3 py-2.5 dark:bg-zinc-800/40 border border-zinc-100/80 dark:border-zinc-800/60">
             <div class="flex items-center gap-2">
               <Badge variant={column.variant} size="sm">{column.label}</Badge>
             </div>
@@ -428,7 +432,7 @@
           <div class="space-y-2">
             {#each columnSnags as snag}
               <a href="/snags/{snag.id}" class="block">
-                <div class="rounded-xl border border-zinc-200/50 bg-white p-3.5 shadow-sm transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:border-zinc-700">
+                <div class="rounded-xl border border-zinc-200/50 bg-white p-3.5 shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_1px_4px_rgba(0,0,0,0.15)] dark:hover:border-zinc-700 dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]">
                   <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{snag.title}</p>
                   <div class="mt-2.5 flex items-center gap-2">
                     <Badge variant={severityVariant(snag.severity)} size="sm">

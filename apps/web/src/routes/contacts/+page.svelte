@@ -135,6 +135,13 @@
       'Builder / Main Contractor': 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
       'Electrician': 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
       'Plumber': 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400',
+      'Groundworker': 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
+      'Roofer': 'bg-teal-50 text-teal-600 dark:bg-teal-900/20 dark:text-teal-400',
+      'Plasterer': 'bg-lime-50 text-lime-700 dark:bg-lime-900/20 dark:text-lime-400',
+      'Kitchen Supplier': 'bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400',
+      'Warranty Inspector': 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+      'Solicitor': 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
+      'Planning Consultant': 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
       'Building Control': 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
     };
     return map[role] ?? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
@@ -192,7 +199,7 @@
         <div class="grid gap-2 sm:grid-cols-2">
           {#each redFlags as flag}
             <div class="flex items-center gap-2.5 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/40">
-              <span class="h-2 w-2 rounded-full bg-red-400 flex-shrink-0"></span>
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-400 flex-shrink-0"></span>
               <span class="text-sm text-zinc-600 dark:text-zinc-400">{flag}</span>
             </div>
           {/each}
@@ -232,7 +239,7 @@
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {#each pinnedContacts as contact}
             <a href="/contacts/{contact.id}" class="group block">
-              <div class="relative rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-all duration-150 hover:shadow-md hover:border-zinc-300/60 dark:border-zinc-800/50 dark:bg-zinc-900 dark:hover:border-zinc-700/60">
+              <div class="relative rounded-xl border border-zinc-200/50 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-zinc-300/60 dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] dark:hover:border-zinc-700/60 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
                 <!-- Pin indicator -->
                 <div class="absolute right-4 top-4">
                   <Pin size={13} class="text-indigo-400/60" />

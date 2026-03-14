@@ -80,13 +80,13 @@
   }
 
   const circumference = 2 * Math.PI * 45;
-  const card = 'rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700/50 dark:bg-zinc-800/80';
-  const cardHover = card + ' transition-all duration-200 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600/50';
+  const card = 'rounded-xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]';
+  const cardHover = card + ' transition-all duration-200 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600/60 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]';
 </script>
 
 <div class="space-y-5">
   <!-- Hero -->
-  <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90">
+  <div class="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90 dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
     <div class="flex items-center justify-between gap-8">
       <div class="min-w-0 flex-1">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Current Phase</p>
@@ -102,7 +102,7 @@
             {@const filled = progress >= cumulativePct}
             {@const partial = !filled && progress > phaseSegments.slice(0, i).reduce((s, p) => s + p.pct, 0)}
             <div
-              class="h-2 flex-1 rounded-[3px] first:rounded-l-md last:rounded-r-md {filled ? 'bg-green-500' : partial ? 'bg-accent-500' : 'bg-zinc-200 dark:bg-zinc-700/60'}"
+              class="h-2 flex-1 rounded-[3px] first:rounded-l-md last:rounded-r-md transition-colors duration-300 {filled ? 'bg-green-500 dark:bg-green-500' : partial ? 'bg-accent-500 dark:bg-accent-400' : 'bg-zinc-200 dark:bg-zinc-700'}"
               title="{segment.name}: {segment.label}"
             ></div>
           {/each}
@@ -118,12 +118,12 @@
         <svg viewBox="0 0 100 100" class="h-[72px] w-[72px]">
           <circle cx="50" cy="50" r="45" fill="none" stroke-width="8" class="stroke-zinc-100 dark:stroke-zinc-700/50" />
           <circle cx="50" cy="50" r="45" fill="none" stroke-width="8"
-            class="stroke-indigo-500"
+            class="stroke-indigo-500 dark:stroke-indigo-400"
             stroke-dasharray={circumference}
             stroke-dashoffset={circumference * (1 - progress / 100)}
             stroke-linecap="round"
             transform="rotate(-90 50 50)"
-            style="transition: stroke-dashoffset 1s ease-out"
+            style="transition: stroke-dashoffset 1s ease-out; filter: drop-shadow(0 0 3px rgba(99,102,241,0.2))"
           />
           <text x="50" y="47" text-anchor="middle" dominant-baseline="central" class="fill-zinc-900 dark:fill-zinc-100 text-xl font-semibold">{progress}%</text>
           <text x="50" y="64" text-anchor="middle" class="fill-zinc-400 dark:fill-zinc-500 text-[8px] uppercase tracking-wider">Complete</text>
@@ -158,9 +158,11 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <CircleDot size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-          <p class="text-sm text-zinc-400 dark:text-zinc-500">No milestones set</p>
-          <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Key milestones will appear here</p>
+          <div class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
+            <CircleCheck size={22} class="text-green-500 dark:text-green-400" />
+          </div>
+          <p class="text-sm font-medium text-zinc-600 dark:text-zinc-300">All tasks up to date</p>
+          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Upcoming milestones will appear here</p>
         </div>
       {/if}
     </a>
@@ -200,8 +202,11 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <Wallet size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-          <p class="text-sm text-zinc-400 dark:text-zinc-500">--</p>
+          <div class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-900/20">
+            <Wallet size={20} class="text-indigo-400 dark:text-indigo-400" />
+          </div>
+          <p class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Budget not configured</p>
+          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Set up your budget in settings</p>
         </div>
       {/if}
     </a>
@@ -253,9 +258,11 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <CalendarDays size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-          <p class="text-sm text-zinc-400 dark:text-zinc-500">No tasks this week</p>
-          <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Upcoming tasks will show here</p>
+          <div class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
+            <CalendarDays size={20} class="text-blue-400 dark:text-blue-400" />
+          </div>
+          <p class="text-sm font-medium text-zinc-600 dark:text-zinc-300">No upcoming deadlines</p>
+          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">This week's tasks will appear here</p>
         </div>
       {/if}
     </a>
@@ -295,9 +302,11 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <GitBranch size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
-          <p class="text-sm text-zinc-400 dark:text-zinc-500">No pending decisions</p>
-          <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Choices needing your input will appear here</p>
+          <div class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
+            <CircleCheck size={22} class="text-green-500 dark:text-green-400" />
+          </div>
+          <p class="text-sm font-medium text-zinc-600 dark:text-zinc-300">All decisions made</p>
+          <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Choices needing your input will appear here</p>
         </div>
       {/if}
     </a>

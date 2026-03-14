@@ -148,8 +148,8 @@
   <!-- Summary cards -->
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Total Budget -->
-    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
-      <div class="border-t-4 border-t-indigo-500"></div>
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-indigo-500 to-indigo-400"></div>
       <div class="p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Total Budget</p>
@@ -164,8 +164,8 @@
     </div>
 
     <!-- Spent -->
-    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
-      <div class="border-t-4 border-t-red-500"></div>
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-red-500 to-rose-400"></div>
       <div class="p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Spent</p>
@@ -180,8 +180,8 @@
     </div>
 
     <!-- Committed -->
-    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
-      <div class="border-t-4 border-t-amber-500"></div>
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-amber-500 to-amber-400"></div>
       <div class="p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Committed</p>
@@ -196,8 +196,8 @@
     </div>
 
     <!-- Remaining -->
-    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 overflow-hidden">
-      <div class="border-t-4 border-t-green-500"></div>
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-green-500 to-emerald-400"></div>
       <div class="p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Remaining</p>
@@ -285,16 +285,16 @@
               </div>
             </div>
             <!-- Stacked progress bar -->
-            <div class="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden flex">
+            <div class="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800/80 overflow-hidden flex">
               {#if spentPct > 0}
                 <div
-                  class="h-2 bg-indigo-500 transition-all duration-500"
+                  class="h-2 bg-gradient-to-r from-indigo-500 to-indigo-400 transition-all duration-700 ease-out first:rounded-l-full"
                   style="width: {spentPct}%"
                 ></div>
               {/if}
               {#if committedPct > 0}
                 <div
-                  class="h-2 bg-amber-400 transition-all duration-500"
+                  class="h-2 bg-gradient-to-r from-amber-400 to-amber-300 transition-all duration-700 ease-out last:rounded-r-full"
                   style="width: {committedPct}%"
                 ></div>
               {/if}
@@ -320,16 +320,16 @@
             <!-- Feature F: Benchmark range -->
             {#if benchmark && allocated > 0}
               {@const bStatus = benchmarkStatus(allocated, benchmark.low, benchmark.high)}
-              <div class="mt-2 flex items-center gap-1.5">
+              <div class="mt-2.5 flex items-center gap-1.5 rounded-md bg-zinc-50/80 dark:bg-zinc-800/30 px-2.5 py-1.5">
                 {#if bStatus === 'within'}
-                  <CircleCheck size={12} class="text-green-500 flex-shrink-0" />
+                  <CircleCheck size={11} class="text-green-500/70 flex-shrink-0" />
                 {:else if bStatus === 'below'}
-                  <TriangleAlert size={12} class="text-amber-500 flex-shrink-0" />
+                  <TriangleAlert size={11} class="text-amber-500/70 flex-shrink-0" />
                 {:else}
-                  <CircleCheck size={12} class="text-green-500 flex-shrink-0" />
+                  <CircleCheck size={11} class="text-green-500/70 flex-shrink-0" />
                 {/if}
-                <span class="text-xs text-zinc-400 dark:text-zinc-500">
-                  UK range: {formatBenchmark(benchmark.low)} &mdash; {formatBenchmark(benchmark.high)}
+                <span class="text-[11px] text-zinc-400 dark:text-zinc-500">
+                  Typical UK range: {formatBenchmark(benchmark.low)} &ndash; {formatBenchmark(benchmark.high)}
                 </span>
               </div>
             {/if}

@@ -84,7 +84,7 @@
 
   <!-- Project card -->
   {#if project}
-    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+    <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
       <div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
         <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Project</h2>
         <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Your build project details</p>
@@ -191,7 +191,7 @@
   {/if}
 
   <!-- Appearance card -->
-  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
     <div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
       <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Appearance</h2>
       <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Customise how BuildBoard looks</p>
@@ -215,13 +215,13 @@
         </div>
         <button
           onclick={toggleDarkMode}
-          class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 {darkMode ? 'bg-accent-600' : 'bg-zinc-200 dark:bg-zinc-700'}"
+          class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 {darkMode ? 'bg-accent-600 shadow-[0_0_8px_rgba(99,102,241,0.3)]' : 'bg-zinc-200'}"
           role="switch"
           aria-checked={darkMode}
           aria-label="Toggle dark mode"
         >
           <span
-            class="inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 {darkMode ? 'translate-x-6' : 'translate-x-1'}"
+            class="inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-out {darkMode ? 'translate-x-6' : 'translate-x-1'}"
           ></span>
         </button>
       </div>
@@ -229,7 +229,7 @@
   </div>
 
   <!-- Account card -->
-  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
     <div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
       <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Account</h2>
       <p class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Manage your account</p>
@@ -253,7 +253,7 @@
   </div>
 
   <!-- About card -->
-  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+  <div class="rounded-xl border border-zinc-200/50 bg-white shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
     <div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
       <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">About</h2>
     </div>

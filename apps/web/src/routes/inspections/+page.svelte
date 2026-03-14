@@ -206,14 +206,14 @@
   </div>
 
   <!-- Info banner -->
-  <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm border-l-4 border-l-blue-500 dark:border-l-blue-500">
+  <div class="rounded-xl border border-blue-200/40 dark:border-blue-800/30 bg-gradient-to-r from-blue-50/80 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/15 shadow-sm">
     <div class="flex items-start gap-3 p-4 lg:p-5">
-      <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
+      <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100/80 dark:bg-blue-900/30">
         <ClipboardCheck size={18} class="text-blue-600 dark:text-blue-400" />
       </div>
       <div class="min-w-0 pt-0.5">
-        <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Booking tip</p>
-        <p class="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Booking tip</p>
+        <p class="mt-0.5 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
           Building Control inspections can be booked same-day &mdash; call before 10am for a visit that afternoon. Click any inspection to see its preparation guide.
         </p>
       </div>
@@ -243,7 +243,7 @@
           {@const type = typeConfig[inspection.type] ?? typeConfig.other}
           {@const isGuideOpen = expandedGuides.has(inspection.id)}
           {@const guide = getGuide(inspection.name)}
-          <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm border-l-4 {status.border} transition-all hover:shadow-md overflow-hidden">
+          <div class="rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] border-l-4 {status.border} transition-all duration-200 hover:shadow-md dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] overflow-hidden">
             <!-- Inspection row -->
             <div
               class="flex items-center gap-4 p-4 cursor-pointer transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
