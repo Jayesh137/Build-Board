@@ -80,13 +80,13 @@
   }
 
   const circumference = 2 * Math.PI * 45;
-  const card = 'rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900';
-  const cardHover = card + ' transition-shadow duration-200 hover:shadow-md';
+  const card = 'rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700/50 dark:bg-zinc-800/80';
+  const cardHover = card + ' transition-all duration-200 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600/50';
 </script>
 
 <div class="space-y-5">
   <!-- Hero -->
-  <div class="{card} !p-6">
+  <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90">
     <div class="flex items-center justify-between gap-8">
       <div class="min-w-0 flex-1">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Current Phase</p>
@@ -102,7 +102,7 @@
             {@const filled = progress >= cumulativePct}
             {@const partial = !filled && progress > phaseSegments.slice(0, i).reduce((s, p) => s + p.pct, 0)}
             <div
-              class="h-2 flex-1 rounded-[3px] first:rounded-l-md last:rounded-r-md {filled ? 'bg-accent-500' : partial ? 'bg-accent-400/50' : 'bg-zinc-200 dark:bg-zinc-700'}"
+              class="h-2 flex-1 rounded-[3px] first:rounded-l-md last:rounded-r-md {filled ? 'bg-green-500' : partial ? 'bg-accent-500' : 'bg-zinc-200 dark:bg-zinc-700/60'}"
               title="{segment.name}: {segment.label}"
             ></div>
           {/each}
@@ -116,9 +116,9 @@
       <!-- Progress ring -->
       <div class="flex shrink-0 flex-col items-center gap-1">
         <svg viewBox="0 0 100 100" class="h-[72px] w-[72px]">
-          <circle cx="50" cy="50" r="45" fill="none" stroke-width="8" class="stroke-zinc-100 dark:stroke-zinc-800" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke-width="8" class="stroke-zinc-100 dark:stroke-zinc-700/50" />
           <circle cx="50" cy="50" r="45" fill="none" stroke-width="8"
-            class="stroke-accent-500"
+            class="stroke-indigo-500"
             stroke-dasharray={circumference}
             stroke-dashoffset={circumference * (1 - progress / 100)}
             stroke-linecap="round"
@@ -139,7 +139,7 @@
     <a href="/timeline" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Next Milestones</p>
-        <span class="text-xs text-accent-500 dark:text-accent-400">View all</span>
+        <span class="text-xs text-indigo-500 dark:text-indigo-400">View all</span>
       </div>
       {#if data.milestones.length > 0}
         <div class="space-y-3">
@@ -158,7 +158,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <Diamond size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <Diamond size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">No milestones set</p>
           <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Key milestones will appear here</p>
         </div>
@@ -169,7 +169,7 @@
     <a href="/budget" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Budget</p>
-        <span class="text-xs text-accent-500 dark:text-accent-400">Details</span>
+        <span class="text-xs text-indigo-500 dark:text-indigo-400">Details</span>
       </div>
       {#if data.budget && data.budget.total > 0}
         <div class="grid grid-cols-2 gap-x-6 gap-y-3">
@@ -200,7 +200,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <Wallet size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <Wallet size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">--</p>
         </div>
       {/if}
@@ -222,7 +222,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <CircleCheck size={28} class="mb-2 text-green-200 dark:text-green-800" />
+          <CircleCheck size={28} class="mb-2 text-green-400 dark:text-green-500" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">All clear</p>
           <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Deadline warnings and compliance alerts will appear here</p>
         </div>
@@ -237,7 +237,7 @@
     <a href="/timeline" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">This Week</p>
-        <span class="text-xs text-accent-500 dark:text-accent-400">View all</span>
+        <span class="text-xs text-indigo-500 dark:text-indigo-400">View all</span>
       </div>
       {#if data.recentTasks.length > 0}
         <div class="space-y-2.5">
@@ -253,7 +253,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <CalendarDays size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <CalendarDays size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">No tasks this week</p>
           <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Upcoming tasks will show here</p>
         </div>
@@ -264,10 +264,10 @@
     <a href="/vat" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">VAT Reclaimable</p>
-        <span class="text-xs text-accent-500 dark:text-accent-400">Details</span>
+        <span class="text-xs text-indigo-500 dark:text-indigo-400">Details</span>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/20">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/30">
           <Receipt size={20} class="text-green-600 dark:text-green-400" />
         </div>
         <div>
@@ -281,11 +281,11 @@
     <a href="/decisions" class="{cardHover} group">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Upcoming Decisions</p>
-        <span class="text-xs text-accent-500 dark:text-accent-400">View all</span>
+        <span class="text-xs text-indigo-500 dark:text-indigo-400">View all</span>
       </div>
       {#if data.decisionCount > 0}
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-50 dark:bg-accent-900/20">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-50 dark:bg-indigo-900/30">
             <GitBranch size={20} class="text-accent-600 dark:text-accent-400" />
           </div>
           <div>
@@ -295,7 +295,7 @@
         </div>
       {:else}
         <div class="flex flex-col items-center py-5 text-center">
-          <GitBranch size={28} class="mb-2 text-zinc-200 dark:text-zinc-700" />
+          <GitBranch size={28} class="mb-2 text-zinc-300 dark:text-zinc-600" />
           <p class="text-sm text-zinc-400 dark:text-zinc-500">No pending decisions</p>
           <p class="mt-0.5 text-xs text-zinc-300 dark:text-zinc-600">Choices needing your input will appear here</p>
         </div>
@@ -307,7 +307,7 @@
   <div class="grid gap-4 sm:grid-cols-3">
     <a href="/snags" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/30">
           <AlertTriangle size={16} class="text-red-500 dark:text-red-400" />
         </div>
         <div>
@@ -320,7 +320,7 @@
 
     <a href="/planning" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/20">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30">
           <Shield size={16} class="text-amber-500 dark:text-amber-400" />
         </div>
         <div>
@@ -333,7 +333,7 @@
 
     <a href="/inspections" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30">
           <ClipboardCheck size={16} class="text-blue-500 dark:text-blue-400" />
         </div>
         <div>
