@@ -8,9 +8,11 @@
     "lint": "turbo lint",
     "db:generate": "pnpm --filter @buildtracker/db generate",
     "db:migrate": "pnpm --filter @buildtracker/db migrate",
-    "db:seed": "pnpm --filter @buildtracker/db seed"
+    "db:seed": "pnpm --filter @buildtracker/db seed",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49",
     "turbo": "^2",
     "typescript": "^5.7"
   },

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd ../.. && pnpm install && pnpm --filter @buildtracker/shared build && pnpm --filter @buildtracker/web build",
+  "installCommand": "echo 'handled in buildCommand'",
+  "framework": "sveltekit"
+}

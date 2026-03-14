@@ -1,0 +1,11 @@
+node_modules
+.svelte-kit
+dist
+.env
+.env.*
+*.md
+docs
+tests
+.turbo
+.git
+Screenshot*
