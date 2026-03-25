@@ -1,0 +1,19 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '0 9 */5 * *'  # Every 5 days at 9am UTC
+  workflow_dispatch:        # Allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -s \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/projects?select=id&limit=1" \
+            -o /dev/null -w "HTTP %{http_code}\n"
+          echo "Keep-alive ping sent at $(date)"
