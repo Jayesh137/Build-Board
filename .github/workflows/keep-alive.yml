@@ -2,7 +2,7 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    - cron: '0 9 */5 * *'  # Every 5 days at 9am UTC
+    - cron: '0 9 */3 * *'  # Every 3 days at 9am UTC (well within Supabase's 7-day pause threshold)
   workflow_dispatch:        # Allow manual trigger
 
 jobs:
@@ -11,9 +11,13 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          curl -s \
+          HTTP_CODE=$(curl -s --fail \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/projects?select=id&limit=1" \
-            -o /dev/null -w "HTTP %{http_code}\n"
-          echo "Keep-alive ping sent at $(date)"
+            -o /dev/null -w "%{http_code}")
+          echo "Keep-alive ping sent at $(date) — HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Expected 200, got $HTTP_CODE. Check SUPABASE_ANON_KEY secret."
+            exit 1
+          fi
