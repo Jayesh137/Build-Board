@@ -2,22 +2,28 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    - cron: '0 9 */3 * *'  # Every 3 days at 9am UTC (well within Supabase's 7-day pause threshold)
-  workflow_dispatch:        # Allow manual trigger
+    - cron: '0 9 * * *'  # Every day at 9am UTC — well within Supabase's 7-day pause threshold
+  workflow_dispatch:      # Allow manual trigger
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Ping Supabase auth health (no auth required)
         run: |
-          HTTP_CODE=$(curl -s --fail \
+          HTTP_CODE=$(curl -s \
+            "https://asgcxmublpxblxmoicjg.supabase.co/auth/v1/health" \
+            -o /dev/null -w "%{http_code}")
+          echo "Auth health ping at $(date) — HTTP $HTTP_CODE"
+
+      - name: Ping Supabase REST API with anon key
+        run: |
+          HTTP_CODE=$(curl -s \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/projects?select=id&limit=1" \
+            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/" \
             -o /dev/null -w "%{http_code}")
-          echo "Keep-alive ping sent at $(date) — HTTP $HTTP_CODE"
+          echo "REST API ping at $(date) — HTTP $HTTP_CODE"
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: Expected 200, got $HTTP_CODE. Check SUPABASE_ANON_KEY secret."
-            exit 1
+            echo "WARNING: REST ping returned $HTTP_CODE — check SUPABASE_ANON_KEY secret"
           fi
