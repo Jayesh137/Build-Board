@@ -16,14 +16,15 @@ jobs:
             -o /dev/null -w "%{http_code}")
           echo "Auth health ping at $(date) — HTTP $HTTP_CODE"
 
-      - name: Ping Supabase REST API with anon key
+      - name: Query projects table (real DB activity)
         run: |
           HTTP_CODE=$(curl -s \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/" \
+            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/projects?select=id&limit=1" \
             -o /dev/null -w "%{http_code}")
-          echo "REST API ping at $(date) — HTTP $HTTP_CODE"
+          echo "DB query ping at $(date) — HTTP $HTTP_CODE"
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "WARNING: REST ping returned $HTTP_CODE — check SUPABASE_ANON_KEY secret"
+            echo "ERROR: DB query returned $HTTP_CODE — Supabase will not count this as activity"
+            exit 1
           fi
