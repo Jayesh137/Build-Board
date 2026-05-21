@@ -20,3 +20,10 @@ dist/
 .vscode/
 *.swp
 *.swo
+
+# Tooling
+.claude/
+.vercel/
+
+# Local scratch
+Screenshot *.png
