@@ -2,29 +2,73 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    - cron: '0 9 * * *'  # Every day at 9am UTC — well within Supabase's 7-day pause threshold
-  workflow_dispatch:      # Allow manual trigger
+    - cron: '0 */12 * * *'  # Every 12h — twice-daily redundancy in case one run is dropped by GitHub
+  workflow_dispatch:
+
+permissions:
+  issues: write  # Needed to open a notification issue on failure
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase auth health (no auth required)
+      - name: Write to keep_alive table (real DB activity)
         run: |
-          HTTP_CODE=$(curl -s \
-            "https://asgcxmublpxblxmoicjg.supabase.co/auth/v1/health" \
-            -o /dev/null -w "%{http_code}")
-          echo "Auth health ping at $(date) — HTTP $HTTP_CODE"
-
-      - name: Query projects table (real DB activity)
-        run: |
-          HTTP_CODE=$(curl -s \
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          RESP=$(mktemp)
+          HTTP_CODE=$(curl -sS -X PATCH \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/projects?select=id&limit=1" \
-            -o /dev/null -w "%{http_code}")
-          echo "DB query ping at $(date) — HTTP $HTTP_CODE"
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: DB query returned $HTTP_CODE — Supabase will not count this as activity"
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            --data "{\"last_ping\":\"$NOW\"}" \
+            "https://asgcxmublpxblxmoicjg.supabase.co/rest/v1/keep_alive?id=eq.1" \
+            -o "$RESP" -w "%{http_code}")
+          echo "DB write at $NOW — HTTP $HTTP_CODE"
+          cat "$RESP"
+          echo
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "204" ]; then
+            echo "::error::DB write returned $HTTP_CODE — Supabase will pause this project if not fixed"
             exit 1
           fi
+          # Belt-and-braces: ensure the row was actually updated (PostgREST returns [] on no-match)
+          if [ "$(wc -c < "$RESP")" -lt 5 ]; then
+            echo "::error::DB write returned empty body — keep_alive row may be missing. Run packages/db/keep_alive.sql"
+            exit 1
+          fi
+
+      - name: Ping auth health (secondary signal)
+        run: |
+          HTTP_CODE=$(curl -sS \
+            "https://asgcxmublpxblxmoicjg.supabase.co/auth/v1/health" \
+            -o /dev/null -w "%{http_code}")
+          echo "Auth health — HTTP $HTTP_CODE"
+
+      - name: Open issue on failure (so I actually find out)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'keep-alive-failure',
+            });
+            if (existing.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Supabase keep-alive failed — project will pause in 7 days`,
+                body: `Workflow run: ${runUrl}\n\nFix and re-run before the 7-day pause window expires.`,
+                labels: ['keep-alive-failure'],
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing[0].number,
+                body: `Another failure: ${runUrl}`,
+              });
+            }
