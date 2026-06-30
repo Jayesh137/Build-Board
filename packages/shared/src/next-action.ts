@@ -60,7 +60,7 @@ export function computeNextActions(state: {
             : step.formName.toLowerCase().includes('form 6')
               ? 'Submit your Commencement Notice (Form 6) to your local authority at least one day before work starts on site.'
               : `Submit ${step.formName} to your local authority as soon as possible.`,
-        link: '/cil',
+        link: '/planning',
       });
     }
   }
@@ -159,7 +159,7 @@ export function computeNextActions(state: {
         guidance: task.isMilestone
           ? 'This milestone is blocking progress. Prioritise completing it or update the schedule if there is a genuine delay.'
           : 'Review whether this task is still relevant and either complete it or reschedule.',
-        link: `/tasks/${task.id}`,
+        link: `/timeline/${task.id}`,
       });
     } else if (daysUntil <= 7) {
       actions.push({
@@ -171,7 +171,7 @@ export function computeNextActions(state: {
           task.status === 'not_started'
             ? 'This task has not been started yet. Confirm the responsible person and begin work.'
             : 'Keep this on track to avoid cascading delays.',
-        link: `/tasks/${task.id}`,
+        link: `/timeline/${task.id}`,
       });
     }
   }
@@ -184,7 +184,7 @@ export function computeNextActions(state: {
     // Find tasks that are not already surfaced as overdue/due-soon above
     const alreadySurfacedIds = new Set(
       actions.filter((a) => a.type === 'task').map((a) => {
-        const match = a.link.match(/\/tasks\/(.+)$/);
+        const match = a.link.match(/\/timeline\/(.+)$/);
         return match ? match[1] : null;
       }),
     );
@@ -204,7 +204,7 @@ export function computeNextActions(state: {
             : nextTask.status === 'blocked'
               ? 'This task is currently blocked. Check what is preventing progress and resolve the blocker.'
               : 'Continue working on this task.',
-        link: `/tasks/${nextTask.id}`,
+        link: `/timeline/${nextTask.id}`,
       });
     }
   }

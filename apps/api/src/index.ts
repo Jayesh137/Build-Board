@@ -86,17 +86,25 @@ app.route('/auth', authRoutes);
 // Setup routes
 app.route('/api/v1/setup', setupRoutes);
 
-// Project-scoped routes (no auth required for personal use)
+// Project-scoped routes
 const projectScoped = new Hono();
-// Set default project context for all project-scoped routes
-projectScoped.use('*', async (c, next) => {
-  const projectId = c.req.param('projectId');
-  c.set('projectId', projectId);
-  c.set('userId', 'owner');
-  c.set('memberRole', 'owner');
-  c.set('memberModules', null);
-  await next();
-});
+
+const personalMode = process.env.BUILDBOARD_PERSONAL_MODE === 'true' || process.env.REQUIRE_AUTH !== 'true';
+
+if (personalMode) {
+  // Local/single-owner mode keeps the current personal workflow working without Supabase JWTs.
+  projectScoped.use('*', async (c, next) => {
+    const projectId = c.req.param('projectId');
+    if (!projectId) return c.json({ error: 'Project ID required' }, 400);
+    c.set('projectId', projectId);
+    c.set('userId', process.env.BUILDBOARD_PERSONAL_USER_ID || 'owner');
+    c.set('memberRole', 'owner');
+    c.set('memberModules', null);
+    await next();
+  });
+} else {
+  projectScoped.use('*', auth, projectAccess);
+}
 projectScoped.route('/', projectRoutes);
 projectScoped.route('/phases', phaseRoutes);
 projectScoped.route('/tasks', taskRoutes);

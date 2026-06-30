@@ -146,6 +146,36 @@ export async function updateTask(
 
   if (!current) return null;
 
+  if (data.status && (data.status === 'in_progress' || data.status === 'done')) {
+    const dependencies = await db
+      .select()
+      .from(taskDependencies)
+      .where(eq(taskDependencies.taskId, taskId));
+
+    if (dependencies.length > 0) {
+      const dependencyTasks = await Promise.all(
+        dependencies.map((dependency) =>
+          db
+            .select()
+            .from(tasks)
+            .where(eq(tasks.id, dependency.dependsOnId))
+            .limit(1),
+        ),
+      );
+
+      const unfinished = dependencyTasks
+        .flat()
+        .filter((dependencyTask) => dependencyTask.status !== 'done');
+
+      if (unfinished.length > 0) {
+        return {
+          error: `Complete prerequisite task first: ${unfinished[0].title}`,
+          code: 'DEPENDENCY_BLOCK',
+        };
+      }
+    }
+  }
+
   // If transitioning to in_progress or done on a construction task, check CIL
   if (
     data.status &&

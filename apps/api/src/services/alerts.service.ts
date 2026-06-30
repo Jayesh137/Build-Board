@@ -100,7 +100,7 @@ async function checkTimelineAlerts(
         module: 'timeline',
         title: `Overdue: ${task.title}`,
         description: `This task was due ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago (${task.dueDate}).`,
-        link: `/tasks/${task.id}`,
+        link: `/timeline/${task.id}`,
       });
     }
     // Due this week
@@ -111,7 +111,7 @@ async function checkTimelineAlerts(
         module: 'timeline',
         title: `Due soon: ${task.title}`,
         description: `Due in ${days} day${days === 1 ? '' : 's'} (${task.dueDate}).`,
-        link: `/tasks/${task.id}`,
+        link: `/timeline/${task.id}`,
       });
     }
 
@@ -123,7 +123,7 @@ async function checkTimelineAlerts(
         module: 'timeline',
         title: `Milestone approaching: ${task.title}`,
         description: `Milestone due in ${days} day${days === 1 ? '' : 's'} (${task.dueDate}).`,
-        link: `/tasks/${task.id}`,
+        link: `/timeline/${task.id}`,
       });
     }
   }
@@ -344,7 +344,7 @@ async function checkCILAlerts(
       module: 'cil',
       title: `CIL: ${step.formName} not confirmed`,
       description: `${step.description} — this blocking step must be confirmed before commencement.`,
-      link: '/cil',
+      link: '/planning',
     });
   });
 }
@@ -375,7 +375,7 @@ async function checkPlanningAlerts(
       module: 'planning',
       title: `Condition ${cond.conditionNumber} not discharged`,
       description: `Pre-commencement condition: ${cond.description}`,
-      link: `/planning/${cond.id}`,
+      link: '/planning',
     });
   });
 }

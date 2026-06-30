@@ -61,7 +61,7 @@
   <form method="POST" use:enhance class="space-y-6">
     <!-- Date -->
     <Card>
-      <Input label="Date" name="date" type="date" bind:value={selectedDate} required />
+      <Input label="Date" name="date" type="date" value={selectedDate} required />
     </Card>
 
     <!-- Weather -->

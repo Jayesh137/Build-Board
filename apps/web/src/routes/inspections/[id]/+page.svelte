@@ -28,8 +28,9 @@
   }
 
   let { data, form } = $props();
+  const formState = form as any;
 
-  const inspection: Inspection | null = data.inspection;
+  const inspection: Inspection | null = data.inspection as Inspection | null;
 
   const statusOptions = [
     { value: 'not_needed', label: 'Not Needed' },
@@ -187,10 +188,10 @@
           placeholder="Notes from the inspection result..."
         />
 
-        {#if form?.error}
-          <p class="text-sm text-red-600">{form.error}</p>
+        {#if formState?.error}
+          <p class="text-sm text-red-600">{formState.error}</p>
         {/if}
-        {#if form?.success}
+        {#if formState?.success}
           <p class="text-sm text-green-600">Inspection updated successfully</p>
         {/if}
 

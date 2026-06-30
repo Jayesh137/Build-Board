@@ -9,6 +9,7 @@
   import Shield from 'lucide-svelte/icons/shield';
   import CircleCheck from 'lucide-svelte/icons/circle-check';
   import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
+  import Lock from 'lucide-svelte/icons/lock';
 
   interface Props {
     data: {
@@ -79,14 +80,25 @@
     }
   }
 
+  function priorityClasses(priority: string): string {
+    switch (priority) {
+      case 'critical':
+        return 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300';
+      case 'warning':
+        return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300';
+      default:
+        return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300';
+    }
+  }
+
   const circumference = 2 * Math.PI * 45;
-  const card = 'rounded-xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]';
-  const cardHover = card + ' transition-all duration-200 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600/60 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]';
+  const card = 'rounded-lg border border-zinc-200/80 bg-white p-5 dark:border-zinc-700/50 dark:bg-zinc-800/90';
+  const cardHover = card + ' transition-colors duration-150 hover:border-zinc-300 hover:bg-zinc-50/60 dark:hover:border-zinc-600/70 dark:hover:bg-zinc-800';
 </script>
 
 <div class="space-y-5">
   <!-- Hero -->
-  <div class="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-700/40 dark:bg-zinc-800/90 dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+  <div class="rounded-lg border border-zinc-200/80 bg-white p-6 dark:border-zinc-700/50 dark:bg-zinc-800/90">
     <div class="flex items-center justify-between gap-8">
       <div class="min-w-0 flex-1">
         <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Current Phase</p>
@@ -131,6 +143,39 @@
       </div>
     </div>
   </div>
+
+  <!-- Next actions -->
+  {#if data.nextActions.length > 0}
+    <section class="rounded-lg border border-zinc-200/80 bg-white p-4 dark:border-zinc-700/50 dark:bg-zinc-800/90">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Next Actions</p>
+          <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Start here when you are not sure what needs attention.</p>
+        </div>
+        <a href="/timeline" class="hidden text-xs font-medium text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 sm:inline">Timeline</a>
+      </div>
+      <div class="grid gap-3 lg:grid-cols-3">
+        {#each data.nextActions.slice(0, 3) as action}
+          <a href={action.link} class="group rounded-md border p-3 transition-colors hover:bg-white dark:hover:bg-zinc-800 {priorityClasses(action.priority)}">
+            <div class="flex items-start gap-2.5">
+              {#if action.type === 'blocker'}
+                <Lock size={16} class="mt-0.5 shrink-0" />
+              {:else if action.type === 'inspection'}
+                <ClipboardCheck size={16} class="mt-0.5 shrink-0" />
+              {:else}
+                <AlertTriangle size={16} class="mt-0.5 shrink-0" />
+              {/if}
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold">{action.title}</p>
+                <p class="mt-1 line-clamp-2 text-xs opacity-85">{action.guidance}</p>
+              </div>
+              <ArrowRight size={14} class="mt-0.5 shrink-0 opacity-50 transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </a>
+        {/each}
+      </div>
+    </section>
+  {/if}
 
   <!-- Row 1: Milestones | Budget | Alerts -->
   <div class="grid gap-5 lg:grid-cols-3">
@@ -314,7 +359,7 @@
 
   <!-- Bottom row: Next Inspection + stats -->
   <div class="grid gap-4 sm:grid-cols-3">
-    <a href="/snags" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
+    <a href="/snags" class="group flex items-center justify-between {card} !py-4 transition-colors duration-150 hover:bg-zinc-50/60 dark:hover:bg-zinc-800">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/30">
           <AlertTriangle size={16} class="text-red-500 dark:text-red-400" />
@@ -327,7 +372,7 @@
       <ArrowRight size={14} class="text-zinc-200 transition-transform group-hover:translate-x-0.5 dark:text-zinc-700" />
     </a>
 
-    <a href="/planning" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
+    <a href="/planning" class="group flex items-center justify-between {card} !py-4 transition-colors duration-150 hover:bg-zinc-50/60 dark:hover:bg-zinc-800">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30">
           <Shield size={16} class="text-amber-500 dark:text-amber-400" />
@@ -340,7 +385,7 @@
       <ArrowRight size={14} class="text-zinc-200 transition-transform group-hover:translate-x-0.5 dark:text-zinc-700" />
     </a>
 
-    <a href="/inspections" class="group flex items-center justify-between {card} !py-4 transition-shadow duration-200 hover:shadow-md">
+    <a href="/inspections" class="group flex items-center justify-between {card} !py-4 transition-colors duration-150 hover:bg-zinc-50/60 dark:hover:bg-zinc-800">
       <div class="flex items-center gap-3">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30">
           <ClipboardCheck size={16} class="text-blue-500 dark:text-blue-400" />

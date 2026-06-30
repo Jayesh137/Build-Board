@@ -38,8 +38,8 @@
 
   let { data, form } = $props();
 
-  const entry: DiaryEntry | null = data.entry;
-  const photos: Photo[] = data.photos ?? [];
+  const entry: DiaryEntry | null = data.entry as DiaryEntry | null;
+  const photos: Photo[] = (data.photos ?? []) as Photo[];
   const dateParam: string = data.date;
 
   let editing = $state(false);

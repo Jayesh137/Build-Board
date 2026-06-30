@@ -72,7 +72,7 @@ export const load: PageServerLoad = async () => {
       const tasks = phase.tasks || [];
       totalTasks += tasks.length;
       for (const t of tasks) {
-        allTasks.push(t);
+        allTasks.push({ ...t, phaseStatus: phase.status });
         if (t.status === 'done') doneTasks++;
         // Collect next incomplete tasks from the current phase
         if (currentPhaseObj && phase.id === currentPhaseObj.id && t.status !== 'done') upNext.push(t);
@@ -123,12 +123,20 @@ export const load: PageServerLoad = async () => {
       inspections,
     });
 
+    const alerts = nextActions.slice(0, 8).map((action, index) => ({
+      id: `next-action-${index}`,
+      priority: action.priority,
+      title: action.title,
+      description: action.reason,
+      link: action.link,
+    }));
+
     // Get phase guidance for the current phase
     const phaseGuidance = getPhaseGuidance(currentPhaseName);
 
     return {
       project: project ? { ...project, progress, currentPhase: currentPhaseName } : null,
-      alerts: [],
+      alerts,
       budget,
       recentTasks: recentTasks.slice(0, 5),
       milestones: upNext.slice(0, 4),

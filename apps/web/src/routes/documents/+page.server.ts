@@ -1,14 +1,15 @@
-import { getDocuments } from '$lib/server/queries';
+import { getDocuments, getPhases } from '$lib/server/queries';
 import { createApiClient } from '$lib/api-client';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const documents = await getDocuments();
-    return { documents: documents ?? [], requiredDocs: [] };
+    const [documents, phases] = await Promise.all([getDocuments(), getPhases()]);
+    const currentBuildPhase = phases.find((phase: any) => phase.status === 'in_progress')?.name ?? null;
+    return { documents: documents ?? [], requiredDocs: [], currentBuildPhase };
   } catch {
-    return { documents: [], requiredDocs: [] };
+    return { documents: [], requiredDocs: [], currentBuildPhase: null };
   }
 };
 

@@ -43,7 +43,16 @@
   let { data, form } = $props();
 
   const snags: Snag[] = data.snags ?? [];
-  const stats: Stats | null = data.stats;
+  const rawStats = data.stats as any;
+  const stats: Stats | null = rawStats
+    ? {
+        total: rawStats.total ?? 0,
+        open: rawStats.open ?? 0,
+        inProgress: rawStats.inProgress ?? rawStats.in_progress ?? 0,
+        fixed: rawStats.fixed ?? rawStats.resolved ?? 0,
+        verified: rawStats.verified ?? 0,
+      }
+    : null;
   const shareToken: string | null = data.shareToken;
 
   let showAddModal = $state(false);

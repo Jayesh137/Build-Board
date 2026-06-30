@@ -45,8 +45,8 @@
 
   let { data, form } = $props();
 
-  const decision: Decision | null = data.decision;
-  const options: DecisionOption[] = data.options ?? [];
+  const decision: Decision | null = data.decision as Decision | null;
+  const options: DecisionOption[] = (data.options ?? []) as DecisionOption[];
 
   let showAddOption = $state(false);
   let showEditDecision = $state(false);

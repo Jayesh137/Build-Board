@@ -32,8 +32,9 @@
   }
 
   let { data, form } = $props();
+  const formState = form as any;
 
-  const contact: Contact | null = data.contact;
+  const contact: Contact | null = data.contact as Contact | null;
 
   const roleOptions = [
     { value: '', label: 'Select role...' },
@@ -196,10 +197,10 @@
           <label for="isPinned" class="text-sm text-zinc-700 dark:text-zinc-300">Pin to top of contacts</label>
         </div>
 
-        {#if form?.error}
-          <p class="text-sm text-red-600">{form.error}</p>
+        {#if formState?.error}
+          <p class="text-sm text-red-600">{formState.error}</p>
         {/if}
-        {#if form?.success}
+        {#if formState?.success}
           <p class="text-sm text-green-600">Contact updated successfully</p>
         {/if}
 

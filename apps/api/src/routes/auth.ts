@@ -2,11 +2,12 @@ import { Hono } from 'hono';
 import { db } from '../lib/db.js';
 import { projects, projectMembers } from '@buildtracker/db';
 import { eq } from 'drizzle-orm';
+import { auth } from '../middleware/auth.js';
 
 const authRoutes = new Hono();
 
 // GET /auth/me — returns current user info + their projects
-authRoutes.get('/me', async (c) => {
+authRoutes.get('/me', auth, async (c) => {
   const userId = c.get('userId');
   const userEmail = c.get('userEmail');
 

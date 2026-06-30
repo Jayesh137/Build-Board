@@ -11,6 +11,7 @@
   import CheckCircle from 'lucide-svelte/icons/circle-check';
 
   let { form } = $props();
+  const formState = form as any;
 
   const sourceOptions = [
     { value: 'direct_purchase', label: 'Direct Purchase (bought materials yourself)' },
@@ -38,21 +39,21 @@
     <h1 class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">New VAT Entry</h1>
   </div>
 
-  {#if form?.success}
+  {#if formState?.success}
     <Card>
       <div class="flex flex-col items-center py-6 text-center">
         <CheckCircle size={48} class="mb-3 text-green-500" />
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Entry Created</h2>
         <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Your VAT entry has been classified.</p>
 
-        {#if form.result}
+        {#if formState.result}
           <div class="mt-4 w-full max-w-sm rounded-md border border-zinc-200 p-4 text-left dark:border-zinc-800">
             <p class="text-xs font-medium uppercase tracking-wider text-zinc-400">Classification Result</p>
             <div class="mt-2 flex items-center gap-2">
               <span class="text-sm text-zinc-700 dark:text-zinc-300">Reclaimable:</span>
-              {#if form.result.reclaimable === 'yes'}
+              {#if formState.result.reclaimable === 'yes'}
                 <Badge variant="done">Yes</Badge>
-              {:else if form.result.reclaimable === 'no'}
+              {:else if formState.result.reclaimable === 'no'}
                 <Badge variant="blocked">No</Badge>
               {:else}
                 <Badge variant="warning">Needs Review</Badge>

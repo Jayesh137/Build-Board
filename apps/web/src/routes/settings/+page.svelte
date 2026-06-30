@@ -26,6 +26,7 @@
   }
 
   let { data, form } = $props();
+  const formState = form as any;
 
   const project: Project | null = data.project;
   const userEmail: string | null = data.userEmail;
@@ -346,8 +347,8 @@
         />
       </div>
 
-      {#if form?.deleteError}
-        <p class="text-sm text-red-600 dark:text-red-400">{form.deleteError}</p>
+      {#if formState?.deleteError}
+        <p class="text-sm text-red-600 dark:text-red-400">{formState.deleteError}</p>
       {/if}
 
       <div class="flex justify-end gap-3 pt-2">

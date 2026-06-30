@@ -49,9 +49,9 @@
 
   let { data, form } = $props();
 
-  const snag: Snag | null = data.snag;
-  const photos: Photo[] = data.photos ?? [];
-  const timeline: TimelineEvent[] = data.timeline ?? [];
+  const snag: Snag | null = data.snag as Snag | null;
+  const photos: Photo[] = (data.photos ?? []) as Photo[];
+  const timeline: TimelineEvent[] = (data.timeline ?? []) as TimelineEvent[];
 
   let showEditModal = $state(false);
   let showResolveModal = $state(false);

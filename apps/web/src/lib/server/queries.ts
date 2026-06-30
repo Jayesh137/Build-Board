@@ -1,19 +1,37 @@
 import { sql } from './db';
 
-const PROJECT_ID = '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
+export const PROJECT_ID =
+  process.env.BUILDBOARD_PROJECT_ID ||
+  process.env.PROJECT_ID ||
+  '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
 
-export async function getProject() {
+export interface ProjectRecord {
+  id: string;
+  name: string;
+  address: string;
+  localAuthority: string;
+  totalBudget: number | null;
+  contingencyPct: number | null;
+  startDate: string | null;
+  targetCompletion: string | null;
+  createdAt: string;
+}
+
+export async function getProject(): Promise<ProjectRecord | null> {
   if (!sql) return null;
   const [p] = await sql`SELECT * FROM projects WHERE id = ${PROJECT_ID}`;
   if (!p) return null;
   return {
+    id: p.id,
+    name: p.name,
+    address: p.address,
     ...p,
     localAuthority: p.local_authority,
     totalBudget: p.total_budget,
     contingencyPct: p.contingency_pct,
     startDate: p.start_date,
     targetCompletion: p.target_completion,
-    createdAt: p.created_at,
+    createdAt: p.created_at ?? '',
   };
 }
 
@@ -49,12 +67,24 @@ export async function getPhases() {
 export async function getBudgetCategories() {
   if (!sql) return [];
   const rows = await sql`SELECT * FROM budget_categories WHERE project_id = ${PROJECT_ID} ORDER BY sort_order`;
+  const entries = await sql`
+    SELECT be.*
+    FROM budget_entries be
+    INNER JOIN budget_categories bc ON bc.id = be.category_id
+    WHERE bc.project_id = ${PROJECT_ID}
+  `;
   return rows.map((r: any) => ({
     ...r,
     projectId: r.project_id,
     allocatedAmount: r.allocated_amount,
     typicalPct: r.typical_pct,
     sortOrder: r.sort_order,
+    committed: entries
+      .filter((e: any) => e.category_id === r.id && e.type === 'quote' && e.status === 'accepted')
+      .reduce((sum: number, e: any) => sum + (e.amount || 0), 0),
+    spent: entries
+      .filter((e: any) => e.category_id === r.id && (e.type === 'payment' || (e.type === 'invoice' && e.status === 'paid')))
+      .reduce((sum: number, e: any) => sum + (e.amount || 0), 0),
   }));
 }
 

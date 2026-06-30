@@ -47,10 +47,11 @@
   }
 
   let { data, form } = $props();
+  const formState = form as any;
 
-  const task: Task | null = data.task;
-  const dependencies: Dependency[] = data.dependencies ?? [];
-  const inspection: Inspection | null = data.inspection;
+  const task: Task | null = data.task as Task | null;
+  const dependencies: Dependency[] = (data.dependencies ?? []) as Dependency[];
+  const inspection: Inspection | null = data.inspection as Inspection | null;
 
   const statusOptions = [
     { value: 'not_started', label: 'Not Started' },
@@ -120,10 +121,10 @@
 
         <Textarea label="Notes" name="notes" value={task.notes ?? ''} rows={3} placeholder="Additional notes..." />
 
-        {#if form?.error}
-          <p class="text-sm text-red-600">{form.error}</p>
+        {#if formState?.error}
+          <p class="text-sm text-red-600">{formState.error}</p>
         {/if}
-        {#if form?.success}
+        {#if formState?.success}
           <p class="text-sm text-green-600">Task updated successfully</p>
         {/if}
 

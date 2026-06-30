@@ -70,7 +70,7 @@ export async function runDeadlineReminders(): Promise<void> {
                 module: 'cil',
                 title: `CIL deadline: ${step.formName}`,
                 description: `${step.description} — deadline in ${days} day${days === 1 ? '' : 's'} (${step.deadline}).`,
-                link: '/cil',
+                link: '/planning',
               });
             }
           }

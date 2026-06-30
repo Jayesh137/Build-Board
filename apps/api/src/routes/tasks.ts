@@ -36,7 +36,7 @@ taskRoutes.patch('/:taskId', async (c) => {
 
   if (!result) return c.json({ error: 'Task not found' }, 404);
 
-  if ('code' in result && result.code === 'CIL_BLOCK') {
+  if ('code' in result) {
     return c.json({ error: result.error, code: result.code }, 409);
   }
 

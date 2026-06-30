@@ -19,7 +19,6 @@
   import ChevronLeft from 'lucide-svelte/icons/chevron-left';
   import MapPin from 'lucide-svelte/icons/map-pin';
   import { page } from '$app/stores';
-  import { goto, invalidateAll } from '$app/navigation';
 
   interface Props {
     data: import('./$types').LayoutServerData;
@@ -86,11 +85,13 @@
     return pathname.startsWith(href);
   }
 
-  async function handleLogout() {
-    await data.session?.access_token;
-    const { error } = await (await fetch('/auth/callback?logout=true', { method: 'POST' })).json().catch(() => ({ error: null }));
-    await goto('/auth/login');
-  }
+  const mobileTabs = [
+    { href: '/', icon: LayoutDashboard, label: 'Home' },
+    { href: '/timeline', icon: CalendarDays, label: 'Time' },
+    { href: '/budget', icon: Wallet, label: 'Budget' },
+    { href: '/diary', icon: BookOpen, label: 'Diary' },
+    { href: '/settings', icon: Settings, label: 'More' },
+  ];
 </script>
 
 <div class="flex h-full">
@@ -113,10 +114,10 @@
         <div class="flex items-start justify-between">
           <div class="min-w-0 flex-1">
             <p class="text-[10px] font-semibold uppercase tracking-widest text-accent-500 dark:text-accent-400">BuildBoard</p>
-            <p class="mt-1.5 text-base font-bold text-zinc-900 dark:text-zinc-50">Little Lodge</p>
+            <p class="mt-1.5 text-base font-bold text-zinc-900 dark:text-zinc-50">{data.projectName}</p>
             <div class="mt-1 flex items-center gap-1.5">
               <MapPin size={11} class="shrink-0 text-zinc-400 dark:text-zinc-500" />
-              <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">Grange View Road, N20</p>
+              <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">{data.projectAddress || 'Project address not set'}</p>
             </div>
           </div>
           <button
@@ -140,10 +141,10 @@
           <div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800/80">
             <div
               class="h-full rounded-full bg-gradient-to-r from-accent-500 to-accent-400 transition-all duration-500 ease-out progress-glow"
-              style="width: 0%"
+              style="width: {data.progress}%"
             ></div>
           </div>
-          <p class="mt-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">0% complete</p>
+          <p class="mt-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">{data.progress}% complete</p>
         </div>
       {:else}
         <div class="flex justify-center">
@@ -214,12 +215,25 @@
         <Menu size={20} />
       </button>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Little Lodge</p>
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{data.projectName}</p>
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-6 pb-24 lg:px-8 lg:pb-6">
       {@render children()}
     </div>
+
+    <nav class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-zinc-200/80 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-sm dark:border-zinc-800/70 dark:bg-zinc-950/95 lg:hidden">
+      {#each mobileTabs as item}
+        {@const active = isActive(item.href, $page.url.pathname)}
+        <a
+          href={item.href}
+          class="flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-[11px] font-medium transition-colors {active ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'}"
+        >
+          <item.icon size={19} />
+          <span>{item.label}</span>
+        </a>
+      {/each}
+    </nav>
   </main>
 </div>

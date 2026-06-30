@@ -1,5 +1,12 @@
-const PROJECT_ID = '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
-const API_BASE = 'http://localhost:3001';
+const PROJECT_ID =
+  process.env.BUILDBOARD_PROJECT_ID ||
+  process.env.PROJECT_ID ||
+  '544c1eb2-3d9f-4fa3-819e-a83522a917a5';
+
+const API_BASE =
+  process.env.BUILDBOARD_API_URL ||
+  process.env.API_URL ||
+  'http://localhost:3001';
 
 export class ApiError extends Error {
   constructor(

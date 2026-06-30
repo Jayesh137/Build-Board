@@ -1,11 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('App Shell Navigation', () => {
-  test.describe('authenticated', () => {
-    // These tests require a test user to be set up in Supabase
-    // Skip for now until test fixtures are configured
-    test.skip(true, 'Requires Supabase test user');
-
+  test.describe('personal mode', () => {
     test('sidebar renders with all navigation groups', async ({ page }) => {
       await page.goto('/');
 
@@ -45,12 +41,11 @@ test.describe('App Shell Navigation', () => {
       }
     });
 
-    test('sidebar has settings and logout in footer', async ({ page }) => {
+    test('sidebar has settings in footer', async ({ page }) => {
       await page.goto('/');
 
       const sidebar = page.locator('aside');
       await expect(sidebar.locator('a[href="/settings"]')).toBeVisible();
-      await expect(sidebar.locator('button', { hasText: 'Log out' })).toBeVisible();
     });
 
     test('mobile menu toggle works', async ({ page }) => {
@@ -84,16 +79,16 @@ test.describe('App Shell Navigation', () => {
       await expect(page.locator('text=Your Build Dashboard').or(page.locator('text=Current Phase'))).toBeVisible();
 
       // Main sections
-      await expect(page.locator('h2', { hasText: 'Next Milestones' })).toBeVisible();
-      await expect(page.locator('h2', { hasText: 'This Week' })).toBeVisible();
-      await expect(page.locator('h2', { hasText: 'Budget' })).toBeVisible();
-      await expect(page.locator('h2', { hasText: 'VAT Reclaimable' })).toBeVisible();
-      await expect(page.locator('h2', { hasText: 'Alerts' })).toBeVisible();
+      await expect(page.locator('text=Up Next')).toBeVisible();
+      await expect(page.locator('text=This Week')).toBeVisible();
+      await expect(page.locator('text=Budget')).toBeVisible();
+      await expect(page.locator('text=VAT Reclaimable')).toBeVisible();
+      await expect(page.locator('text=Alerts')).toBeVisible();
 
       // Bottom quick stats
       await expect(page.locator('text=Open Snags')).toBeVisible();
-      await expect(page.locator('text=Pending Decisions')).toBeVisible();
-      await expect(page.locator('text=Undischarged Conditions')).toBeVisible();
+      await expect(page.locator('text=Conditions')).toBeVisible();
+      await expect(page.locator('text=Inspections')).toBeVisible();
     });
   });
 });

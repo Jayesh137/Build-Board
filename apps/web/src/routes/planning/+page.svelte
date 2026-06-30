@@ -364,7 +364,7 @@
                       <Check size={16} />
                     {:else if step.status === 'overdue'}
                       <AlertTriangle size={14} />
-                    {:else if step.isBlocking && step.status !== 'confirmed'}
+                    {:else if step.isBlocking}
                       <Lock size={14} class={step.status === 'not_started' ? 'text-zinc-400 dark:text-zinc-500' : ''} />
                     {:else if step.status === 'submitted'}
                       <CircleDot size={14} />
