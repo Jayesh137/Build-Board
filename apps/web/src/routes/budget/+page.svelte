@@ -115,12 +115,20 @@
       <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Budget</h1>
       <p class="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">Track spending and allocations</p>
     </div>
-    <a href="/budget/entries">
-      <Button variant="secondary" size="sm">
-        <Receipt size={16} />
-        View Entries
-      </Button>
-    </a>
+    <div class="flex items-center gap-2">
+      <a href="/budget/entries">
+        <Button variant="secondary" size="sm">
+          <Receipt size={16} />
+          View Entries
+        </Button>
+      </a>
+      <a href="/budget/entries/new">
+        <Button size="sm">
+          <Wallet size={16} />
+          Log Entry
+        </Button>
+      </a>
+    </div>
   </div>
 
   <!-- Feature A: What's Next prompt -->

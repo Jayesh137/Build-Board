@@ -1,6 +1,5 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
@@ -12,6 +11,7 @@
   import User from 'lucide-svelte/icons/user';
   import Github from 'lucide-svelte/icons/github';
   import Info from 'lucide-svelte/icons/info';
+  import LogOut from 'lucide-svelte/icons/log-out';
 
   interface Project {
     id: string;
@@ -55,12 +55,8 @@
 
   function formatBudget(value: number | null): string {
     if (!value) return '';
-    return value.toString();
-  }
-
-  async function handleLogout() {
-    await fetch('/auth/callback?logout=true', { method: 'POST' }).catch(() => {});
-    await goto('/auth/login');
+    // DB stores pence; display in pounds
+    return Math.round(value / 100).toString();
   }
 
   $effect(() => {
@@ -151,14 +147,24 @@
                 class="block w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-3 h-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
               />
             </div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500">Enter amount in pounds (e.g. 350000 for &pound;350,000)</p>
           </div>
 
-          <Input
-            label="Target Completion Date"
-            name="targetCompletion"
-            type="date"
-            value={project.targetCompletion ?? ''}
-          />
+          <div class="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Build Start Date"
+              name="startDate"
+              type="date"
+              value={project.startDate ?? ''}
+            />
+
+            <Input
+              label="Target Completion"
+              name="targetCompletion"
+              type="date"
+              value={project.targetCompletion ?? ''}
+            />
+          </div>
 
           <div class="flex items-center justify-between border-t border-zinc-100 pt-5 dark:border-zinc-800">
             <span class="text-xs text-zinc-400 dark:text-zinc-500">
@@ -243,12 +249,15 @@
           </div>
           <div>
             <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Email</p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">{userEmail ?? 'Not available'}</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">{userEmail ?? 'Personal mode'}</p>
           </div>
         </div>
-        <Button variant="secondary" size="sm" onclick={handleLogout}>
-          Log out
-        </Button>
+        <form method="POST" action="?/logout" use:enhance>
+          <Button variant="secondary" size="sm" type="submit">
+            <LogOut size={14} />
+            Log out
+          </Button>
+        </form>
       </div>
     </div>
   </div>

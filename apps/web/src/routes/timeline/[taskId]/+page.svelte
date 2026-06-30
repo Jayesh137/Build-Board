@@ -5,12 +5,11 @@
   import Input from '$lib/components/ui/Input.svelte';
   import Select from '$lib/components/ui/Select.svelte';
   import Textarea from '$lib/components/ui/Textarea.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
+  import MilestoneCelebration from '$lib/components/MilestoneCelebration.svelte';
   import ArrowLeft from 'lucide-svelte/icons/arrow-left';
   import Link from 'lucide-svelte/icons/link';
   import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
-  import Diamond from 'lucide-svelte/icons/diamond';
 
   interface Task {
     id: string;
@@ -62,7 +61,21 @@
 
   const dependsOn = $derived(dependencies.filter((d: Dependency) => d.direction === 'depends_on'));
   const dependedBy = $derived(dependencies.filter((d: Dependency) => d.direction === 'depended_by'));
+
+  // Milestone celebration
+  let showCelebration = $state(false);
+  let submittedStatus = $state('');
+
+  $effect(() => {
+    if (formState?.success && task?.isMilestone && submittedStatus === 'done') {
+      showCelebration = true;
+    }
+  });
 </script>
+
+{#if task?.isMilestone}
+  <MilestoneCelebration bind:show={showCelebration} milestoneName={task.title} />
+{/if}
 
 <div class="space-y-6">
   <!-- Back link -->
@@ -87,14 +100,24 @@
         <StatusBadge status={task.status} size="md" />
       </div>
 
-      <form method="POST" action="?/update" use:enhance class="space-y-4">
+      <form
+        method="POST"
+        action="?/update"
+        use:enhance={({ formData }) => {
+          submittedStatus = formData.get('status') as string;
+          return async ({ update }) => {
+            await update();
+          };
+        }}
+        class="space-y-4"
+      >
         <Input label="Title" name="title" value={task.title} required />
 
         <Textarea label="Description" name="description" value={task.description ?? ''} rows={3} placeholder="Task details..." />
 
         <div class="grid gap-4 sm:grid-cols-2">
           <Select label="Status" name="status" options={statusOptions} value={task.status} />
-          <Input label="Assignee ID" name="assigneeId" value={task.assigneeId ?? ''} placeholder="Contact ID" />
+          <Input label="Assignee" name="assigneeId" value={task.assigneeId ?? ''} placeholder="Contact name or ID" />
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">

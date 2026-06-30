@@ -24,12 +24,13 @@
         currentPhase: string;
       } | null;
       alerts: Array<{ id: string; priority: string; title: string; description: string; link: string }>;
-      budget: { total: number; spent: number; committed: number; remaining: number; contingencyRemaining: number; contingencyPct: number } | null;
+      budget: { total: number; spent: number; committed: number; remaining: number; contingencyAmount: number; contingencyUsed: number; contingencyRemainingPct: number; contingencyPct: number } | null;
       recentTasks: Array<{ id: string; title: string; status: string; dueDate: string | null }>;
       milestones: Array<{ id: string; title: string; dueDate: string | null; status: string }>;
       snagCount: number;
       decisionCount: number;
       conditionCount: number;
+      inspectionCount: number;
       vatTotal: number;
       nextActions: any[];
       phaseGuidance: any;
@@ -240,9 +241,10 @@
         <div class="mt-4">
           <div class="flex items-center justify-between text-[10px]">
             <span class="uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Contingency</span>
+            <span class="tabular-nums text-zinc-400 dark:text-zinc-500">{data.budget.contingencyRemainingPct}% left</span>
           </div>
           <div class="mt-1 h-1.5 w-full rounded-full bg-zinc-100 dark:bg-zinc-800">
-            <div class="h-1.5 rounded-full bg-green-500 transition-all duration-500" style="width: {Math.min(data.budget.contingencyPct, 100)}%"></div>
+            <div class="h-1.5 rounded-full transition-all duration-500 {data.budget.contingencyRemainingPct > 50 ? 'bg-green-500' : data.budget.contingencyRemainingPct > 20 ? 'bg-amber-500' : 'bg-red-500'}" style="width: {Math.min(data.budget.contingencyRemainingPct, 100)}%"></div>
           </div>
         </div>
       {:else}
@@ -392,7 +394,7 @@
         </div>
         <div>
           <p class="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Inspections</p>
-          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">17</p>
+          <p class="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{data.inspectionCount}</p>
         </div>
       </div>
       <ArrowRight size={14} class="text-zinc-200 transition-transform group-hover:translate-x-0.5 dark:text-zinc-700" />

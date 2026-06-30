@@ -470,7 +470,7 @@
 
     <Input label="Due Date" name="dueDate" type="date" />
 
-    <Input label="Assignee ID" name="assigneeId" placeholder="Contact ID (optional)" />
+    <Input label="Assignee" name="assigneeId" placeholder="Contact name (optional)" />
 
     <div class="flex items-center gap-2">
       <input type="checkbox" id="isMilestone" name="isMilestone" value="true" class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500" />

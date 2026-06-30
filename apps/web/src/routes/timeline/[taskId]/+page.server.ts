@@ -44,6 +44,7 @@ export const actions: Actions = {
         isMilestone,
         notes: notes || null,
       });
+      return { success: true };
     } catch {
       return fail(500, { error: 'Failed to update task' });
     }

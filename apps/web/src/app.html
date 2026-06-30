@@ -11,6 +11,14 @@
     />
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     %sveltekit.head%
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    </script>
   </head>
   <body class="h-full bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100" data-sveltekit-preload-data="hover">
     <div class="h-full" style="display: contents">%sveltekit.body%</div>

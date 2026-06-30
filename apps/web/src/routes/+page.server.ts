@@ -87,13 +87,24 @@ export const load: PageServerLoad = async () => {
     const totalCommitted = budgetCategories.reduce((sum: number, c: any) => sum + (c.committed ?? 0), 0);
     const totalBudget = project?.totalBudget ?? 0;
 
+    const contingencyPct = project?.contingencyPct ?? 15;
+    const contingencyAmount = Math.round(totalBudget * (contingencyPct / 100));
+    const totalAllocated = budgetCategories.reduce((sum: number, c: any) => sum + (c.allocatedAmount ?? 0), 0);
+    const baselineForContingency = totalAllocated > 0 ? totalAllocated : totalBudget - contingencyAmount;
+    const contingencyUsed = Math.max(0, (totalSpent + totalCommitted) - baselineForContingency);
+    const contingencyRemainingPct = contingencyAmount > 0
+      ? Math.max(0, Math.round(((contingencyAmount - contingencyUsed) / contingencyAmount) * 100))
+      : 100;
+
     const budget = {
       total: totalBudget,
       spent: totalSpent,
       committed: totalCommitted,
       remaining: totalBudget - totalSpent - totalCommitted,
-      contingencyRemaining: project?.contingencyPct ?? 15,
-      contingencyPct: project?.contingencyPct ?? 15,
+      contingencyAmount,
+      contingencyUsed,
+      contingencyRemainingPct,
+      contingencyPct,
     };
 
     // Decisions count (pending ones)
@@ -143,6 +154,7 @@ export const load: PageServerLoad = async () => {
       snagCount,
       decisionCount,
       conditionCount,
+      inspectionCount: inspections.length,
       vatTotal,
       nextActions,
       phaseGuidance,

@@ -62,8 +62,15 @@
   let filterStatus = $state('all');
   let copied = $state(false);
 
-  // Feature A: "What's Next" dismissable
-  let whatsNextDismissed = $state(false);
+  // Feature A: "What's Next" dismissable, persisted to localStorage
+  let whatsNextDismissed = $state(
+    typeof localStorage !== 'undefined' && localStorage.getItem('snags_tip_dismissed') === '1'
+  );
+
+  function dismissWhatsNext() {
+    whatsNextDismissed = true;
+    try { localStorage.setItem('snags_tip_dismissed', '1'); } catch(e) {}
+  }
 
   const severityOptions = [
     { value: 'all', label: 'All severities' },
@@ -99,6 +106,9 @@
     { value: 'Landing', label: 'Landing' },
     { value: 'Garage', label: 'Garage' },
     { value: 'Utility', label: 'Utility' },
+    { value: 'Sauna', label: 'Sauna' },
+    { value: 'Gym', label: 'Gym' },
+    { value: 'Loft / Office', label: 'Loft / Office' },
     { value: 'Garden', label: 'Garden' },
     { value: 'Exterior', label: 'Exterior' },
     { value: 'Other', label: 'Other' },
@@ -219,7 +229,7 @@
         Spot a defect? Log it with a photo. The quicker you report snags, the sooner they get fixed.
       </p>
       <button
-        onclick={() => (whatsNextDismissed = true)}
+        onclick={dismissWhatsNext}
         class="flex-shrink-0 rounded-lg p-1 text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
       >
         <XIcon size={14} />

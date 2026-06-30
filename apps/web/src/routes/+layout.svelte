@@ -18,6 +18,7 @@
   import X from 'lucide-svelte/icons/x';
   import ChevronLeft from 'lucide-svelte/icons/chevron-left';
   import MapPin from 'lucide-svelte/icons/map-pin';
+  import Grid3x3 from 'lucide-svelte/icons/grid-3x3';
   import { page } from '$app/stores';
 
   interface Props {
@@ -29,6 +30,7 @@
 
   let sidebarOpen = $state(false);
   let sidebarCollapsed = $state(false);
+  let moreDrawerOpen = $state(false);
 
   const navGroups = [
     {
@@ -80,6 +82,18 @@
     },
   ];
 
+  const moreModules = [
+    { href: '/vat', icon: Receipt, label: 'VAT Reclaim' },
+    { href: '/planning', icon: FileCheck, label: 'Planning & CIL' },
+    { href: '/decisions', icon: GitBranch, label: 'Decisions' },
+    { href: '/contacts', icon: Users, label: 'Contacts' },
+    { href: '/photos', icon: Camera, label: 'Photos' },
+    { href: '/inspections', icon: ClipboardCheck, label: 'Inspections' },
+    { href: '/documents', icon: FolderOpen, label: 'Documents' },
+    { href: '/snags', icon: AlertTriangle, label: 'Snags' },
+    { href: '/settings', icon: Settings, label: 'Settings' },
+  ];
+
   function isActive(href: string, pathname: string): boolean {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
@@ -87,10 +101,9 @@
 
   const mobileTabs = [
     { href: '/', icon: LayoutDashboard, label: 'Home' },
-    { href: '/timeline', icon: CalendarDays, label: 'Time' },
+    { href: '/timeline', icon: CalendarDays, label: 'Timeline' },
     { href: '/budget', icon: Wallet, label: 'Budget' },
     { href: '/diary', icon: BookOpen, label: 'Diary' },
-    { href: '/settings', icon: Settings, label: 'More' },
   ];
 </script>
 
@@ -102,6 +115,44 @@
       onclick={() => (sidebarOpen = false)}
       aria-label="Close sidebar"
     ></button>
+  {/if}
+
+  <!-- Mobile "More" drawer backdrop -->
+  {#if moreDrawerOpen}
+    <button
+      class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] lg:hidden"
+      onclick={() => (moreDrawerOpen = false)}
+      aria-label="Close more menu"
+    ></button>
+  {/if}
+
+  <!-- Mobile "More" drawer -->
+  {#if moreDrawerOpen}
+    <div class="fixed inset-x-0 bottom-[56px] z-[60] rounded-t-2xl border-t border-zinc-200/80 bg-white/98 px-4 pb-4 pt-4 backdrop-blur-md dark:border-zinc-800/60 dark:bg-zinc-950/98 lg:hidden">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">All Modules</p>
+        <button
+          onclick={() => (moreDrawerOpen = false)}
+          class="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+          aria-label="Close"
+        >
+          <X size={16} />
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        {#each moreModules as item}
+          {@const active = isActive(item.href, $page.url.pathname)}
+          <a
+            href={item.href}
+            onclick={() => (moreDrawerOpen = false)}
+            class="flex flex-col items-center gap-2 rounded-xl px-2 py-3 text-center transition-colors {active ? 'bg-accent-50 text-accent-700 dark:bg-accent-950/40 dark:text-accent-400' : 'text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800/50'}"
+          >
+            <item.icon size={22} />
+            <span class="text-[11px] font-medium leading-tight">{item.label}</span>
+          </a>
+        {/each}
+      </div>
+    </div>
   {/if}
 
   <!-- Sidebar -->
@@ -223,17 +274,26 @@
       {@render children()}
     </div>
 
-    <nav class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-zinc-200/80 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-sm dark:border-zinc-800/70 dark:bg-zinc-950/95 lg:hidden">
+    <!-- Mobile bottom nav: 4 fixed tabs + "More" button -->
+    <nav class="fixed inset-x-0 bottom-0 z-40 flex border-t border-zinc-200/80 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-sm dark:border-zinc-800/70 dark:bg-zinc-950/95 lg:hidden">
       {#each mobileTabs as item}
         {@const active = isActive(item.href, $page.url.pathname)}
         <a
           href={item.href}
-          class="flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-[11px] font-medium transition-colors {active ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'}"
+          class="flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-md text-[11px] font-medium transition-colors {active ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'}"
         >
           <item.icon size={19} />
           <span>{item.label}</span>
         </a>
       {/each}
+      <button
+        onclick={() => (moreDrawerOpen = !moreDrawerOpen)}
+        class="flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-md text-[11px] font-medium transition-colors {moreDrawerOpen ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'}"
+        aria-label="More modules"
+      >
+        <Grid3x3 size={19} />
+        <span>More</span>
+      </button>
     </nav>
   </main>
 </div>

@@ -11,7 +11,7 @@ export const load: PageServerLoad = async () => {
       open: snags.filter((s: any) => s.status === 'open').length,
       assigned: snags.filter((s: any) => s.status === 'assigned').length,
       in_progress: snags.filter((s: any) => s.status === 'in_progress').length,
-      resolved: snags.filter((s: any) => s.status === 'resolved').length,
+      fixed: snags.filter((s: any) => s.status === 'fixed').length,
       verified: snags.filter((s: any) => s.status === 'verified').length,
       total: snags.length,
     };
